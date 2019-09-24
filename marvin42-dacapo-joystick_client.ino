@@ -1,18 +1,18 @@
+#include <math.h>
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
 #include "src/crc.h"
 #include "src/packet.h"
 #include "src/custom_packets.h"
+#include "src/Vector2.hpp"
 #include "InterruptIn.hpp"
 #include "src/generic.hpp"
 
-#include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
-#ifndef STASSID
-#define STASSID "ssid"
-#define STAPSK  "password"
-#endif
+#define STASSID ""
+#define STAPSK  ""
 
-unsigned long delayTime = 100;
+unsigned long delayTime = 500;
 const unsigned int MAX = 1024 + 1;
 
 WiFiUDP client;
@@ -20,29 +20,46 @@ WiFiUDP client;
 #define ADDRESS "192.168.10.33"
 #define PORT    1042
 
+InterruptIn joystickButton(D2);
 InterruptIn pauseButton(D3);
 
+void onJoystickButtonPressed(const bool value)
+{
+    if(value)
+    {
+        Serial.println("Joystick button released");
+    }
+    else
+    {
+        Serial.println("Joystick button pressed");
+    }
+}
+
 bool isPaused = false;
-void onPushPauseButton(const bool value)
+void onPauseButtonPressed(const bool value)
 {
     if(!value)
         return;
 
     isPaused = !isPaused;
     Serial.println(isPaused ? "Paused" : "Unpaused");
+    delay(150);
 }
 
-void setup()
+void setup(void)
 {
     Serial.begin(115200);
 
-    randomSeed(analogRead(0));//*
+    //randomSeed(analogRead(0));//*
 
     // Initialize the output variables as outputs
-    pinMode(A0, INPUT);
-    pinMode(RX, INPUT);
+    pinMode(A0, INPUT); // X axis
+    pinMode(D1, INPUT); // Y axis
 
-    WiFi.mode(WIFI_STA);
+    pinMode(D2, INPUT);
+    digitalWrite(D2, HIGH);
+
+    /*WiFi.mode(WIFI_STA);
     WiFi.begin(STASSID, STAPSK);
     while(WiFi.status() != WL_CONNECTED)
     {
@@ -52,12 +69,32 @@ void setup()
 
     Serial.print("Connected! IP address: ");
     Serial.println(WiFi.localIP());
-    client.begin(PORT);
+    client.begin(PORT);*/
 
-    pauseButton.SetOnStateChangedCallback(onPushPauseButton);
+    joystickButton.SetOnStateChangedCallback(onJoystickButtonPressed);
+    pauseButton.SetOnStateChangedCallback(onPauseButtonPressed);
 }
 
-void loop()
+static float DotNormalized(const Vector2& a, const Vector2& b)
+{
+    return (asin(Vector2::DotProduct(a.GetNormalized(), b.GetNormalized())) / M_PI) * 2.0f;
+}
+
+static Vector2 CrossNormalized(const Vector2& a, const Vector2& b)
+{
+    return Vector2::PerpendicularCW(a.GetNormalized() - b.GetNormalized()).GetNormalized();
+}
+
+static Vector2 Deviation(const Vector2& position)
+{
+    return Vector2
+    (
+        -CrossNormalized(Vector2::Zero, position).GetY(),
+        clamp11(DotNormalized(Vector2::Zero, position))
+    );
+}
+
+void loop(void)
 {
     pauseButton.Poll();
     if(isPaused)
@@ -66,20 +103,25 @@ void loop()
     //int axisX = random(0, MAX); // Debug
     //int axisY = random(0, MAX); // Debug
     int axisX = analogRead(A0);
-    int axisY = analogRead(RX);
+    int axisY = analogRead(D1);
 
-    float normX = normalize11((float)axisX, 0, MAX);
-    float normY = normalize11((float)axisY, 0, MAX);
+    Vector2 norm = Vector2(normalize11((float)axisX, 0, MAX), normalize11((float)axisY, 0, MAX));
 
-    Serial.print("x="); Serial.print(normX);
-    Serial.print(", y="); Serial.println(normY);
+    /*if(abs(norm.GetX()) <= 0.01f && abs(norm.GetY()) <= 0.01f)
+    {
+        Serial.println("Deadzone");
+        return;
+    }*/
 
-    packet_motorrun_t pkt;
+    Serial.print("x="); Serial.print(norm.GetX()); Serial.print(", y="); Serial.println(norm.GetY());
+    joystickButton.Poll();
+
+    /*packet_motorrun_t pkt;
     packet_mkmotorrun(&pkt, normX, normY);
 
     client.beginPacket(ADDRESS, PORT);
     client.write((const char*)&pkt, sizeof(pkt));
-    client.endPacket();
+    client.endPacket();*/
 
     delay(delayTime);
 }
