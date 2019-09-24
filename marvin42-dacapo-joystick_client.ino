@@ -55,6 +55,8 @@ void setup(void)
     // Initialize the output variables as outputs
     pinMode(A0, INPUT); // X axis
     pinMode(D1, INPUT); // Y axis
+    pinMode(D8, INPUT); //Inbuilt 10k pulldown
+    pinMode(D3, INPUT); //Inbuilt 10k pullup
 
     pinMode(D2, INPUT);
     digitalWrite(D2, HIGH);
@@ -96,16 +98,28 @@ static Vector2 Deviation(const Vector2& position)
 
 void loop(void)
 {
-    pauseButton.Poll();
+    /*pauseButton.Poll();
     if(isPaused)
         return;
-
+    */
     //int axisX = random(0, MAX); // Debug
     //int axisY = random(0, MAX); // Debug
     int axisX = analogRead(A0);
     int axisY = analogRead(D1);
+    int axisYF = digitalRead(D8);
+    int axisYB = digitalRead(D3);
+    float t; 
 
-    Vector2 norm = Vector2(normalize11((float)axisX, 0, MAX), normalize11((float)axisY, 0, MAX));
+    //Button controll for forward and backward drive.
+    if(axisYF){
+        t = 1;
+    }else if(!axisYB){
+        t = -1;
+    } else {
+        t = 0;
+    }
+    //Vector2 norm = Vector2(normalize11((float)axisX, 0, MAX), normalize11((float)axisY, 0, MAX);
+    Vector2 norm = Vector2(normalize11((float)axisX, 0, MAX), t);
 
     /*if(abs(norm.GetX()) <= 0.01f && abs(norm.GetY()) <= 0.01f)
     {
