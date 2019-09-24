@@ -61,7 +61,7 @@ void setup(void)
     pinMode(D2, INPUT);
     digitalWrite(D2, HIGH);
 
-    /*WiFi.mode(WIFI_STA);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(STASSID, STAPSK);
     while(WiFi.status() != WL_CONNECTED)
     {
@@ -71,7 +71,7 @@ void setup(void)
 
     Serial.print("Connected! IP address: ");
     Serial.println(WiFi.localIP());
-    client.begin(PORT);*/
+    client.begin(PORT);
 
     joystickButton.SetOnStateChangedCallback(onJoystickButtonPressed);
     pauseButton.SetOnStateChangedCallback(onPauseButtonPressed);
@@ -130,12 +130,12 @@ void loop(void)
     Serial.print("x="); Serial.print(norm.GetX()); Serial.print(", y="); Serial.println(norm.GetY());
     joystickButton.Poll();
 
-    /*packet_motorrun_t pkt;
+    packet_motorrun_t pkt;
     packet_mkmotorrun(&pkt, normX, normY);
 
     client.beginPacket(ADDRESS, PORT);
     client.write((const char*)&pkt, sizeof(pkt));
-    client.endPacket();*/
+    client.endPacket();
 
     delay(delayTime);
 }
