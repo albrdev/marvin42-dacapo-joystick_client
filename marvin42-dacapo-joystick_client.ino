@@ -8,17 +8,12 @@
 #include "InterruptIn.hpp"
 #include "RotaryEncoder.hpp"
 #include "src/generic.hpp"
-
-#define STASSID ""
-#define STAPSK  ""
+#include "config.h" // IP/port, WiFi SSID/password
 
 unsigned long delayTime = 500;
 const unsigned int MAX = 1024 + 1;
 
 WiFiUDP client;
-
-#define ADDRESS "192.168.10.33"
-#define PORT    1042
 
 //InterruptIn pauseButton(D3);
 RotaryEncoder rotaryEncoder(D0, D1, D4);
@@ -97,7 +92,7 @@ void setup(void)
     pinMode(D3, INPUT); // Inbuilt 10k pullup
 
     WiFi.mode(WIFI_STA);
-    WiFi.begin(STASSID, STAPSK);
+    WiFi.begin(SSID, PSK);
     while(WiFi.status() != WL_CONNECTED)
     {
         Serial.print('.');
