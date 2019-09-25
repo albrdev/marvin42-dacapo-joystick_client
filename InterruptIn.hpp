@@ -17,7 +17,7 @@ public:
     bool GetState(void) const;
     void SetOnStateChangedCallback(const interruptin_triggercallback_t value);
 
-    void Poll(void);
+    virtual void Poll(void);
 
     InterruptIn(const uint8_t pin);
 };
