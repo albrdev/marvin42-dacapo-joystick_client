@@ -1,9 +1,14 @@
 #include "RotaryEncoder.hpp"
 #include <Arduino.h>
 
-void RotaryEncoder::SetOnValueChangedCallback(const OnValueChangedEventHandler value)
+void RotaryEncoder::SetOnValueChangedEvent(const OnValueChangedEventHandler value)
 {
     m_OnValueChangedEvent = value;
+}
+
+void RotaryEncoder::SetOnRevolutionEvent(const OnRevolutionEventHandler value)
+{
+    m_OnRevolutionEvent = value;
 }
 
 void RotaryEncoder::Poll(void)
@@ -19,21 +24,20 @@ void RotaryEncoder::Poll(void)
         m_Counter += cw ? 1 : -1;
         m_LastCLKState = clkState;
 
-        if(m_Counter > 0 && m_Counter % MaxCount == 0)
-        {
-            m_Counter = 0;
-        }
-
         if(m_OnValueChangedEvent != nullptr)
             m_OnValueChangedEvent(m_Counter, cw);
+
+        if(m_Counter != 0 && m_Counter % MaxCount == 0)
+        {
+            m_Counter = 0;
+            if(m_OnRevolutionEvent != nullptr)
+                m_OnRevolutionEvent(cw);
+        }
     }
 }
 
-RotaryEncoder::RotaryEncoder(const uint8_t clkPin, const uint8_t dtPin, const uint8_t swPin) : InterruptIn(swPin)
+RotaryEncoder::RotaryEncoder(const uint8_t clkPin, const uint8_t dtPin, const uint8_t swPin) : InterruptIn(swPin), m_CLKPin(clkPin), m_DTPin(dtPin)
 {
-    m_CLKPin = clkPin;
-    m_DTPin = dtPin;
-
     pinMode(m_CLKPin, INPUT);
     pinMode(m_DTPin, INPUT);
 

@@ -3,19 +3,20 @@
 
 #include <stdint.h> /* uint8_t */
 
-typedef void(*interruptin_triggercallback_t)(const bool);
-
 class InterruptIn
 {
+public:
+    typedef void(*OnStateChangedEventHandler)(const bool);
+
 private:
     uint8_t m_Pin;
     bool m_State;
 
-    interruptin_triggercallback_t m_OnStateChangedCallback = nullptr;
+    OnStateChangedEventHandler m_OnStateChangedEvent = nullptr;
 
 public:
     bool GetState(void) const;
-    void SetOnStateChangedCallback(const interruptin_triggercallback_t value);
+    void SetOnStateChangedEvent(const OnStateChangedEventHandler value);
 
     virtual void Poll(void);
 

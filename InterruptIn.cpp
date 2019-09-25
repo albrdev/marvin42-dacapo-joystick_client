@@ -6,9 +6,9 @@ bool InterruptIn::GetState(void) const
     return digitalRead(m_Pin);
 }
 
-void InterruptIn::SetOnStateChangedCallback(const interruptin_triggercallback_t value)
+void InterruptIn::SetOnStateChangedEvent(const OnStateChangedEventHandler value)
 {
-    m_OnStateChangedCallback = value;
+    m_OnStateChangedEvent = value;
 }
 
 void InterruptIn::Poll(void)
@@ -17,14 +17,13 @@ void InterruptIn::Poll(void)
     if(state != m_State)
     {
         m_State = state;
-        if(m_OnStateChangedCallback != nullptr) { m_OnStateChangedCallback(m_State); }
+        if(m_OnStateChangedEvent != nullptr)
+            m_OnStateChangedEvent(m_State);
     }
 }
 
-InterruptIn::InterruptIn(const uint8_t pin)
+InterruptIn::InterruptIn(const uint8_t pin) : m_Pin(pin)
 {
-    m_Pin = pin;
-
     pinMode(m_Pin, INPUT);
     m_State = digitalRead(m_Pin);
 }
