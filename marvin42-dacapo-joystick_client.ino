@@ -5,8 +5,8 @@
 #include "src/crc.h"
 #include "src/packet.h"
 #include "src/custom_packets.h"
-//#include "src/Vector2.hpp"
 #include "InterruptIn.hpp"
+#include "RotaryEncoder.hpp"
 #include "src/generic.hpp"
 
 #define STASSID ""
@@ -20,22 +20,61 @@ WiFiUDP client;
 #define ADDRESS "192.168.10.33"
 #define PORT    1042
 
-InterruptIn joystickButton(D2);
-InterruptIn pauseButton(D3);
+//InterruptIn pauseButton(D3);
+RotaryEncoder rotaryEncoder(D0, D1, D4);
+int currentCount = 0;
+
+int8_t direction = 0;
+float balance = 0.0f;
+float lastBalance = 0.0f;
+int8_t lastDirection = -2;
 
 void onJoystickButtonPressed(const bool value)
 {
     if(value)
     {
-        Serial.println("Joystick button released");
+        //Serial.println("Joystick button released");
+        Serial.println("Reset balance");
+        currentCount = 0;
     }
     else
     {
-        Serial.println("Joystick button pressed");
+        //Serial.println("Joystick button pressed");
     }
+
+    //delay(100);
 }
 
-bool isPaused = false;
+void onRotationChanged(const int value, const bool cw)
+{
+    if(cw)
+    {
+        if(currentCount >= RotaryEncoder::MaxCount)
+        {
+            Serial.println("Max. value reached: ");
+            return;
+        }
+    }
+    else
+    {
+        if(currentCount <= -RotaryEncoder::MaxCount)
+        {
+            Serial.println("Min. value reached: ");
+            return;
+        }
+    }
+
+    currentCount += cw ? 1 : -1;
+    //Serial.print("Counter: "); Serial.print(currentCount); Serial.print(", CW: "); Serial.println(cw);
+    //delay(100);
+}
+
+void onRevolution(const bool cw)
+{
+    //currentCount = cw ? RotaryEncoder::MaxCount : -RotaryEncoder::MaxCount;
+}
+
+/*bool isPaused = false;
 void onPauseButtonPressed(const bool value)
 {
     if(!value)
@@ -44,8 +83,9 @@ void onPauseButtonPressed(const bool value)
     isPaused = !isPaused;
     Serial.println(isPaused ? "Paused" : "Unpaused");
     delay(150);
-}
+}*/
 
+uint8_t lastCLKState;
 void setup(void)
 {
     Serial.begin(115200);
@@ -53,13 +93,8 @@ void setup(void)
     //randomSeed(analogRead(0));//*
 
     // Initialize the output variables as outputs
-    pinMode(A0, INPUT); // X axis
-    pinMode(D1, INPUT); // Y axis
-    pinMode(D8, INPUT); //Inbuilt 10k pulldown
-    pinMode(D3, INPUT); //Inbuilt 10k pullup
-
-    pinMode(D2, INPUT);
-    //digitalWrite(D2, HIGH);
+    pinMode(D8, INPUT); // Inbuilt 10k pulldown
+    pinMode(D3, INPUT); // Inbuilt 10k pullup
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(STASSID, STAPSK);
@@ -73,74 +108,62 @@ void setup(void)
     Serial.println(WiFi.localIP());
     client.begin(PORT);
 
-    joystickButton.SetOnStateChangedCallback(onJoystickButtonPressed);
-    pauseButton.SetOnStateChangedCallback(onPauseButtonPressed);
+    rotaryEncoder.SetOnValueChangedEvent(onRotationChanged);
+    rotaryEncoder.SetOnRevolutionEvent(onRevolution);
+    rotaryEncoder.SetOnStateChangedEvent(onJoystickButtonPressed);
+    //pauseButton.SetOnStateChangedEvent(onPauseButtonPressed);
 }
 
-/*static float DotNormalized(const Vector2& a, const Vector2& b)
+void SendMotorJSDataPacket(const float balance, const float direction)
 {
-    return (asin(Vector2::DotProduct(a.GetNormalized(), b.GetNormalized())) / M_PI) * 2.0f;
-}*/
-
-/*static Vector2 CrossNormalized(const Vector2& a, const Vector2& b)
-{
-    return Vector2::PerpendicularCW(a.GetNormalized() - b.GetNormalized()).GetNormalized();
-}*/
-
-/*static Vector2 Deviation(const Vector2& position)
-{
-    return Vector2
-    (
-        -CrossNormalized(Vector2::Zero, position).GetY(),
-        clamp11(DotNormalized(Vector2::Zero, position))
-    );
-}*/
-
-float lastBalance = 0.0f;
-int8_t lastDirection = -2;
-void loop(void)
-{
-    /*pauseButton.Poll();
-    if(isPaused)
-        return;
-    */
-    //int axisX = random(0, MAX); // Debug
-    //int axisY = random(0, MAX); // Debug
-    int axisX = analogRead(A0);
-    //int axisY = analogRead(D1);
-    int axisYF = digitalRead(D8);
-    int axisYB = digitalRead(D3);
-    int8_t direction; 
-
-    //Button controll for forward and backward drive.
-    if(axisYF){
-        direction = 1;
-    }else if(!axisYB){
-        direction = -1;
-    } else {
-        direction = 0;
-    }
-    //Vector2 norm = Vector2(normalize11((float)axisX, 0, MAX), normalize11((float)axisY, 0, MAX);
-    float balance = normalize11((float)axisX, 0, MAX);
-    
-    Serial.print("x="); Serial.print(balance); Serial.print(", y="); Serial.println(direction);
-    
-    if(abs(balance - lastBalance) <= 0.01f && direction == lastDirection)
-    {
-        //Serial.println("Deadzone");
-        return;
-    }
-  Serial.println("Sending data");
-    //joystickButton.Poll();
-
     packet_motorjsdata_t pkt;
     packet_mkmotorjsdata(&pkt, balance, direction);
 
     client.beginPacket(ADDRESS, PORT);
     client.write((const char*)&pkt, sizeof(pkt));
     client.endPacket();
+}
+
+void SendMotorStopPacket(void)
+{
+    packet_motorjsdata_t pkt;
+    packet_mkbasic(&pkt, CPT_MOTORSTOP);
+
+    client.beginPacket(ADDRESS, PORT);
+    client.write((const char*)&pkt, sizeof(pkt));
+    client.endPacket();
+}
+
+void loop(void)
+{
+    /*pauseButton.Poll();
+    if(isPaused)
+        return;*/
+
+    uint8_t forwardsButton = digitalRead(D8);
+    uint8_t backwardsButton = digitalRead(D3);
+
+    if(forwardsButton)
+        direction = 1;
+    else if(!backwardsButton)
+        direction = -1;
+
+    rotaryEncoder.Poll();
+    balance = normalize11((float)currentCount, -RotaryEncoder::MaxCount, RotaryEncoder::MaxCount);
+    balance *= -1;
+    //Serial.print("balance="); Serial.print(balance); Serial.print(", direction="); Serial.println(direction);
+
+    if(absdiff(balance, lastBalance) <= 0.05f && direction == lastDirection)
+    {
+        //Serial.println("Deadzone");
+        return;
+    }
 
     lastBalance = balance;
     lastDirection = direction;
-    delay(delayTime);
+
+    Serial.println("Sending data");
+    SendMotorJSDataPacket(balance, direction);
+
+    //delay(delayTime);
 }
