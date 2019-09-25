@@ -5,7 +5,7 @@
 #include "src/crc.h"
 #include "src/packet.h"
 #include "src/custom_packets.h"
-#include "src/Vector2.hpp"
+//#include "src/Vector2.hpp"
 #include "InterruptIn.hpp"
 #include "src/generic.hpp"
 
@@ -59,7 +59,7 @@ void setup(void)
     pinMode(D3, INPUT); //Inbuilt 10k pullup
 
     pinMode(D2, INPUT);
-    digitalWrite(D2, HIGH);
+    //digitalWrite(D2, HIGH);
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(STASSID, STAPSK);
@@ -77,25 +77,27 @@ void setup(void)
     pauseButton.SetOnStateChangedCallback(onPauseButtonPressed);
 }
 
-static float DotNormalized(const Vector2& a, const Vector2& b)
+/*static float DotNormalized(const Vector2& a, const Vector2& b)
 {
     return (asin(Vector2::DotProduct(a.GetNormalized(), b.GetNormalized())) / M_PI) * 2.0f;
-}
+}*/
 
-static Vector2 CrossNormalized(const Vector2& a, const Vector2& b)
+/*static Vector2 CrossNormalized(const Vector2& a, const Vector2& b)
 {
     return Vector2::PerpendicularCW(a.GetNormalized() - b.GetNormalized()).GetNormalized();
-}
+}*/
 
-static Vector2 Deviation(const Vector2& position)
+/*static Vector2 Deviation(const Vector2& position)
 {
     return Vector2
     (
         -CrossNormalized(Vector2::Zero, position).GetY(),
         clamp11(DotNormalized(Vector2::Zero, position))
     );
-}
+}*/
 
+float lastBalance = 0.0f;
+int8_t lastDirection = -2;
 void loop(void)
 {
     /*pauseButton.Poll();
@@ -105,37 +107,40 @@ void loop(void)
     //int axisX = random(0, MAX); // Debug
     //int axisY = random(0, MAX); // Debug
     int axisX = analogRead(A0);
-    int axisY = analogRead(D1);
+    //int axisY = analogRead(D1);
     int axisYF = digitalRead(D8);
     int axisYB = digitalRead(D3);
-    float t; 
+    int8_t direction; 
 
     //Button controll for forward and backward drive.
     if(axisYF){
-        t = 1;
+        direction = 1;
     }else if(!axisYB){
-        t = -1;
+        direction = -1;
     } else {
-        t = 0;
+        direction = 0;
     }
     //Vector2 norm = Vector2(normalize11((float)axisX, 0, MAX), normalize11((float)axisY, 0, MAX);
-    Vector2 norm = Vector2(normalize11((float)axisX, 0, MAX), t);
-
-    /*if(abs(norm.GetX()) <= 0.01f && abs(norm.GetY()) <= 0.01f)
+    float balance = normalize11((float)axisX, 0, MAX);
+    
+    Serial.print("x="); Serial.print(balance); Serial.print(", y="); Serial.println(direction);
+    
+    if(abs(balance - lastBalance) <= 0.01f && direction == lastDirection)
     {
-        Serial.println("Deadzone");
+        //Serial.println("Deadzone");
         return;
-    }*/
+    }
+  Serial.println("Sending data");
+    //joystickButton.Poll();
 
-    Serial.print("x="); Serial.print(norm.GetX()); Serial.print(", y="); Serial.println(norm.GetY());
-    joystickButton.Poll();
-
-    packet_motorrun_t pkt;
-    packet_mkmotorrun(&pkt, normX, normY);
+    packet_motorjsdata_t pkt;
+    packet_mkmotorjsdata(&pkt, balance, direction);
 
     client.beginPacket(ADDRESS, PORT);
     client.write((const char*)&pkt, sizeof(pkt));
     client.endPacket();
 
+    lastBalance = balance;
+    lastDirection = direction;
     delay(delayTime);
 }
