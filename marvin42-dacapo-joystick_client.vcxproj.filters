@@ -16,6 +16,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="marvin42-dacapo-joystick_client.ino" />
+    <None Include=".gitattributes" />
+    <None Include=".gitignore" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.marvin42-dacapo-joystick_client.vsarduino.h">
@@ -59,5 +62,8 @@
     <ClCompile Include="RotaryEncoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="LICENSE.txt" />
   </ItemGroup>
 </Project>

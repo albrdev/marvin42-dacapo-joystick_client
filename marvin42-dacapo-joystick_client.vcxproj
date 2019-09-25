@@ -107,9 +107,12 @@
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemGroup>
+    <None Include=".gitattributes" />
+    <None Include=".gitignore" />
     <None Include="marvin42-dacapo-joystick_client.ino">
       <FileType>CppCode</FileType>
     </None>
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InterruptIn.hpp" />
@@ -127,6 +130,9 @@
     <ClCompile Include="src\custom_packets.c" />
     <ClCompile Include="src\generic.cpp" />
     <ClCompile Include="src\packet.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
