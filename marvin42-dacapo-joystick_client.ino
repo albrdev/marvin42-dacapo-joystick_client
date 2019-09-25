@@ -64,11 +64,6 @@ void onRotationChanged(const int value, const bool cw)
     //delay(100);
 }
 
-void onRevolution(const bool cw)
-{
-    //currentCount = cw ? RotaryEncoder::MaxCount : -RotaryEncoder::MaxCount;
-}
-
 /*bool isPaused = false;
 void onPauseButtonPressed(const bool value)
 {
@@ -104,7 +99,6 @@ void setup(void)
     client.begin(PORT);
 
     rotaryEncoder.SetOnValueChangedEvent(onRotationChanged);
-    rotaryEncoder.SetOnRevolutionEvent(onRevolution);
     rotaryEncoder.SetOnStateChangedEvent(onJoystickButtonPressed);
     //pauseButton.SetOnStateChangedEvent(onPauseButtonPressed);
 }
