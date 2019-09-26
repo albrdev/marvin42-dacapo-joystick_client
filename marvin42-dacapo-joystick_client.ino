@@ -62,7 +62,7 @@ void onRotationChanged(const int value, const bool cw)
         }
     }
 
-    currentCount += cw ? 1 : -1;
+    currentCount += cw ? -1 : 1;
     PrintDebug("Counter: "); PrintDebug(currentCount); PrintDebug(", Direction: "); PrintDebugLine(cw ? "CW" : "CCW");
     //delay(100);
 }
@@ -144,7 +144,6 @@ void loop(void)
 
     rotaryEncoder.Poll();
     balance = normalize11((float)currentCount, -RotaryEncoder::MaxCount, RotaryEncoder::MaxCount);
-    balance *= -1;
     //PrintDebug("Input: "); PrintDebug("balance="); PrintDebug(balance); PrintDebug(", direction="); PrintDebugLine(direction);
 
     if(absdiff(balance, lastBalance) <= 0.05f && direction == lastDirection)
