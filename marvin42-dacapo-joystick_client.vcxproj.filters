@@ -19,6 +19,7 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="README.md" />
+    <None Include="config.h.example" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.marvin42-dacapo-joystick_client.vsarduino.h">

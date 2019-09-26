@@ -1,0 +1,10 @@
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
+
+#define SSID    "ssid"
+#define PSK     "password"
+
+#define ADDRESS "127.0.0.1"
+#define PORT    12345
+
+#endif // __CONFIG_H__

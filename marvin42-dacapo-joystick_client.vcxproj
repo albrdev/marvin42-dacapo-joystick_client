@@ -109,6 +109,7 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include="config.h.example" />
     <None Include="marvin42-dacapo-joystick_client.ino">
       <FileType>CppCode</FileType>
     </None>
