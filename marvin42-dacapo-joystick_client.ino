@@ -8,7 +8,7 @@
 #include "InterruptIn.hpp"
 #include "RotaryEncoder.hpp"
 
-#define M42_DEBUG // Must define before including 'generic.hpp'
+//#define M42_DEBUG // Must define before including 'generic.hpp'
 #include "src/generic.hpp"
 
 #include "config.h" // IP/port, WiFi SSID/password
