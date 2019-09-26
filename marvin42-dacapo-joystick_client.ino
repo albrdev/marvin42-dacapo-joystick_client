@@ -7,35 +7,38 @@
 #include "src/custom_packets.h"
 #include "InterruptIn.hpp"
 #include "RotaryEncoder.hpp"
+
+#define M42_DEBUG // Must define before including 'generic.hpp'
 #include "src/generic.hpp"
+
 #include "config.h" // IP/port, WiFi SSID/password
 
-unsigned long delayTime = 500;
-const unsigned int MAX = 1024 + 1;
+const unsigned long delayTime = 500;
 
 WiFiUDP client;
-
-//InterruptIn pauseButton(D3);
 RotaryEncoder rotaryEncoder(D0, D1, D4);
-int currentCount = 0;
+//InterruptIn pauseButton(D3);
 
+int currentCount = 0;
 int8_t direction = 0;
 float balance = 0.0f;
 float lastBalance = 0.0f;
 int8_t lastDirection = -2;
 
+//bool isPaused = false;
+
 void onJoystickButtonPressed(const bool value)
 {
     if(value)
     {
-        //Serial.println("Joystick button released");
-        Serial.println("Reset balance");
+        //PrintDebugLine("Joystick button released");
+        PrintDebugLine("Reset balance");
         currentCount = 0;
     }
-    else
+    /*else
     {
-        //Serial.println("Joystick button pressed");
-    }
+        //PrintDebugLine("Joystick button pressed");
+    }*/
 
     //delay(100);
 }
@@ -46,7 +49,7 @@ void onRotationChanged(const int value, const bool cw)
     {
         if(currentCount >= RotaryEncoder::MaxCount)
         {
-            Serial.println("Max. value reached: ");
+            PrintDebugLine("Max. value reached: ");
             return;
         }
     }
@@ -54,30 +57,30 @@ void onRotationChanged(const int value, const bool cw)
     {
         if(currentCount <= -RotaryEncoder::MaxCount)
         {
-            Serial.println("Min. value reached: ");
+            PrintDebugLine("Min. value reached: ");
             return;
         }
     }
 
     currentCount += cw ? 1 : -1;
-    //Serial.print("Counter: "); Serial.print(currentCount); Serial.print(", CW: "); Serial.println(cw);
+    PrintDebug("Counter: "); PrintDebug(currentCount); PrintDebug(", Direction: "); PrintDebugLine(cw ? "CW" : "CCW");
     //delay(100);
 }
 
-/*bool isPaused = false;
-void onPauseButtonPressed(const bool value)
+/*void onPauseButtonPressed(const bool value)
 {
     if(!value)
         return;
 
     isPaused = !isPaused;
-    Serial.println(isPaused ? "Paused" : "Unpaused");
+    PrintDebugLine(isPaused ? "Paused" : "Unpaused");
     delay(150);
 }*/
 
-uint8_t lastCLKState;
 void setup(void)
 {
+    delay(2500);
+    Serial.print("Initializing...");
     Serial.begin(115200);
 
     //randomSeed(analogRead(0));//*
@@ -101,6 +104,8 @@ void setup(void)
     rotaryEncoder.SetOnValueChangedEvent(onRotationChanged);
     rotaryEncoder.SetOnStateChangedEvent(onJoystickButtonPressed);
     //pauseButton.SetOnStateChangedEvent(onPauseButtonPressed);
+
+    Serial.println("Done");
 }
 
 void SendMotorJSDataPacket(const float balance, const float direction)
@@ -140,7 +145,7 @@ void loop(void)
     rotaryEncoder.Poll();
     balance = normalize11((float)currentCount, -RotaryEncoder::MaxCount, RotaryEncoder::MaxCount);
     balance *= -1;
-    //Serial.print("balance="); Serial.print(balance); Serial.print(", direction="); Serial.println(direction);
+    //PrintDebug("Input: "); PrintDebug("balance="); PrintDebug(balance); PrintDebug(", direction="); PrintDebugLine(direction);
 
     if(absdiff(balance, lastBalance) <= 0.05f && direction == lastDirection)
     {
@@ -148,11 +153,10 @@ void loop(void)
         return;
     }
 
-    lastBalance = balance;
-    lastDirection = direction;
-
-    Serial.println("Sending data");
+    PrintDebug("Sending: "); PrintDebug("balance="); PrintDebug(balance); PrintDebug(", direction="); PrintDebugLine(direction);
     SendMotorJSDataPacket(balance, direction);
 
+    lastBalance = balance;
+    lastDirection = direction;
     //delay(delayTime);
 }
