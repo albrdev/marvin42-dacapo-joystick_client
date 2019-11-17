@@ -2,14 +2,14 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
-#include "src/crc.h"
-#include "src/packet.h"
-#include "src/custom_packets.h"
+#include "crc.h"
+#include "packet.h"
+#include "custom_packets.h"
 #include "InterruptIn.hpp"
 #include "RotaryEncoder.hpp"
 
 //#define M42_DEBUG // Must define before including 'generic.hpp'
-#include "src/generic.hpp"
+#include "generic.hpp"
 
 #include "config.h" // IP/port, WiFi SSID/password
 
