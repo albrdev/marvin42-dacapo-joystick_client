@@ -7,7 +7,7 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
@@ -15,54 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="marvin42-dacapo-joystick_client.ino" />
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
-    <None Include="README.md" />
+    <None Include=".gitmodules" />
     <None Include="config.h.example" />
+    <None Include="marvin42-dacapo-joystick_client.ino" />
+    <None Include="platformio.ini" />
+    <None Include="README.md" />
+    <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.marvin42-dacapo-joystick_client.vsarduino.h">
+    <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\crc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\custom_packets.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\generic.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\packet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterruptIn.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RotaryEncoder.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\crc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\custom_packets.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\generic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\packet.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InterruptIn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RotaryEncoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
