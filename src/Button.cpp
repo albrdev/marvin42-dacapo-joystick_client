@@ -24,6 +24,6 @@ void Button::Poll(void)
 
 Button::Button(const uint8_t pin) : m_Pin(pin)
 {
-    pinMode(m_Pin, INPUT);
+    pinMode(m_Pin, INPUT_PULLUP);
     m_State = digitalRead(m_Pin);
 }
