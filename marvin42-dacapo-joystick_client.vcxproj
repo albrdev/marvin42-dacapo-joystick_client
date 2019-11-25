@@ -102,9 +102,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="inc\InterruptIn.hpp" />
+    <ClInclude Include="inc\RotaryEncoder.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\InterruptIn.cpp" />
+    <ClCompile Include="src\RotaryEncoder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
