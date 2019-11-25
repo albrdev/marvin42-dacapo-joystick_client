@@ -1,16 +1,17 @@
 #include "Joystick.hpp"
 #include <Arduino.h>
 #include "maths.h"
+#include "generic.hpp"
 
 float Joystick::GetX(void) const
 {
-    float value = normalize11((float)analogRead(m_PinX), 0, 1023);
+    float value = normalize11((float)analogRead(m_PinX), 0, ANALOG_MAX);
     return fabs(value) >= m_Deadzone ? value : 0.0f;
 }
 
 float Joystick::GetY(void) const
 {
-    float value = normalize11((float)analogRead(m_PinY), 0, 1023);
+    float value = normalize11((float)analogRead(m_PinY), 0, ANALOG_MAX);
     return fabs(value) >= m_Deadzone ? value : 0.0f;
 }
 

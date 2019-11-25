@@ -1,5 +1,5 @@
-#ifndef _JOYSTICK_HPP_
-#define _JOYSTICK_HPP_
+#ifndef __JOYSTICK_HPP__
+#define __JOYSTICK_HPP__
 
 #include <stdint.h>
 #include "Button.hpp"
@@ -18,4 +18,4 @@ class Joystick : public Button
     float m_Deadzone;
 };
 
-#endif
+#endif // __JOYSTICK_HPP__
