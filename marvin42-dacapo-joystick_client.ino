@@ -9,9 +9,9 @@
 
 #include "config.h" // IP/port, WiFi SSID/password
 
-const unsigned long delayTime = 500;
-
 #define D2 2
+
+const unsigned long delayTime = 500;
 
 Joystick joystick(A0, A1, D2, 0.05);
 
@@ -35,13 +35,15 @@ void onJoystickButtonPressed(const bool value)
 
 void setup(void)
 {
-    delay(2500);
-    Serial.print("Initializing...");
     Serial.begin(9600);
+    Serial.println("Initializing...");
+    Serial.flush();
+    delay(2500);
 
     joystick.SetOnStateChangedEvent(onJoystickButtonPressed);
 
     Serial.println("Done");
+    Serial.flush();
 }
 
 void SendMotorRunPacket(const float x, const float y)
