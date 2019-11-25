@@ -1,17 +1,17 @@
-#include "InterruptIn.hpp"
+#include "Button.hpp"
 #include <Arduino.h>    /* pinMode(), digitalRead() */
 
-bool InterruptIn::GetState(void) const
+bool Button::GetState(void) const
 {
     return digitalRead(m_Pin);
 }
 
-void InterruptIn::SetOnStateChangedEvent(const OnStateChangedEventHandler value)
+void Button::SetOnStateChangedEvent(const OnStateChangedEventHandler value)
 {
     m_OnStateChangedEvent = value;
 }
 
-void InterruptIn::Poll(void)
+void Button::Poll(void)
 {
     bool state = digitalRead(m_Pin);
     if(state != m_State)
@@ -22,7 +22,7 @@ void InterruptIn::Poll(void)
     }
 }
 
-InterruptIn::InterruptIn(const uint8_t pin) : m_Pin(pin)
+Button::Button(const uint8_t pin) : m_Pin(pin)
 {
     pinMode(m_Pin, INPUT);
     m_State = digitalRead(m_Pin);

@@ -102,14 +102,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
-    <ClInclude Include="inc\InterruptIn.hpp" />
+    <ClInclude Include="inc\Button.hpp" />
     <ClInclude Include="inc\Joystick.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\InterruptIn.cpp" />
+    <ClCompile Include="src\Button.cpp" />
     <ClCompile Include="src\Joystick.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

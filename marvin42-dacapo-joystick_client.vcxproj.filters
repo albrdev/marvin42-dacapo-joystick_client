@@ -28,10 +28,10 @@
     <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\InterruptIn.hpp">
+    <ClInclude Include="inc\Joystick.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Joystick.hpp">
+    <ClInclude Include="inc\Button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -39,10 +39,10 @@
     <Text Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\InterruptIn.cpp">
+    <ClCompile Include="src\Joystick.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Joystick.cpp">
+    <ClCompile Include="src\Button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

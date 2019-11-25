@@ -1,9 +1,9 @@
-#ifndef __INTERRUPTIN_HPP__
-#define __INTERRUPTIN_HPP__
+#ifndef __BUTTON_HPP__
+#define __BUTTON_HPP__
 
 #include <stdint.h> /* uint8_t */
 
-class InterruptIn
+class Button
 {
 public:
     typedef void(*OnStateChangedEventHandler)(const bool);
@@ -20,7 +20,7 @@ public:
 
     virtual void Poll(void);
 
-    InterruptIn(const uint8_t pin);
+    Button(const uint8_t pin);
 };
 
-#endif // __INTERRUPTIN_HPP__
+#endif // __BUTTON_HPP__
