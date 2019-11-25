@@ -5,25 +5,29 @@
 #include "custom_packets.h"
 #include "Button.hpp"
 #include "Joystick.hpp"
+#include "Regulator.hpp"
 #include "generic.hpp"
 
 #include "config.h" // IP/port, WiFi SSID/password
 
 #define D2 2
+#define D3 3
 
 const unsigned long delayTime = 500;
 
-Joystick joystick(A0, A1, D2, 0.05);
+Joystick leftJoystick(A0, A1, D2, 0.05);
+Joystick rightJoystick(A2, A3, D3, 0.05);
+Regulator speedRegulator(A4, 22.0f / ANALOG_MAX, 1000.0f / ANALOG_MAX, 0.005);
 
 float lastX = 0.0f;
 float lastY = 0.0f;
 
-void onJoystickButtonPressed(const bool value)
+void onLeftJoystickButtonPressed(const bool value)
 {
     if(value)
     {
         //PrintDebugLine("Joystick button released");
-        PrintDebugLine("Joystick button");
+        PrintDebugLine("Left joystick button");
     }
     /*else
     {
@@ -33,6 +37,27 @@ void onJoystickButtonPressed(const bool value)
     delay(250);
 }
 
+void onRightJoystickButtonPressed(const bool value)
+{
+    if(value)
+    {
+        //PrintDebugLine("Joystick button released");
+        PrintDebugLine("Right joystick button");
+    }
+    /*else
+    {
+        //PrintDebugLine("Joystick button pressed");
+    }*/
+
+    delay(250);
+}
+
+void onSpeedRegulated(const float oldValue, const float newValue)
+{
+    int dir = sgn(newValue - oldValue);
+    PrintDebug("Speed: "); PrintDebug(dir > 0 ? "Increased to " : "Decreased to "); PrintDebugLine(newValue);
+}
+
 void setup(void)
 {
     Serial.begin(9600);
@@ -40,7 +65,9 @@ void setup(void)
     Serial.flush();
     delay(2500);
 
-    joystick.SetOnStateChangedEvent(onJoystickButtonPressed);
+    leftJoystick.SetOnStateChangedEvent(onLeftJoystickButtonPressed);
+    leftJoystick.SetOnStateChangedEvent(onRightJoystickButtonPressed);
+    speedRegulator.SetOnValueChangedEvent(onSpeedRegulated);
 
     Serial.println("Done");
     Serial.flush();
@@ -64,21 +91,27 @@ void SendMotorStopPacket(void)
 
 void loop(void)
 {
-    joystick.Poll();
-    float x = joystick.GetX();
-    float y = joystick.GetY();
-    //PrintDebug("Input: "); PrintDebug("x="); PrintDebug(x); PrintDebug(", y="); PrintDebugLine(y);
+    leftJoystick.Poll();
+    rightJoystick.Poll();
+    speedRegulator.Poll();
 
-    if(absdiff(x, lastX) <= 0.05f && absdiff(y, lastY) <= 0.05f)
+    float x1 = leftJoystick.GetX();
+    float y1 = leftJoystick.GetY();
+    float x2 = rightJoystick.GetX();
+    float y2 = rightJoystick.GetY();
+    //PrintDebug("Joystick(1): "); PrintDebug("x="); PrintDebug(x1); PrintDebug(", y="); PrintDebugLine(y1);
+    //PrintDebug("Joystick(2): "); PrintDebug("x="); PrintDebug(x2); PrintDebug(", y="); PrintDebugLine(y2);
+
+    if(absdiff(x1, lastX) <= 0.05f && absdiff(y1, lastY) <= 0.05f)
     {
         return;
     }
 
     //PrintDebug("Sending: "); PrintDebug("x="); PrintDebug(x); PrintDebug(", y="); PrintDebugLine(y);
-    SendMotorRunPacket(x, y);
+    SendMotorRunPacket(x1, y1);
 
-    lastX = x;
-    lastY = y;
+    lastX = x1;
+    lastY = y1;
 
     //delay(delayTime);
 }
