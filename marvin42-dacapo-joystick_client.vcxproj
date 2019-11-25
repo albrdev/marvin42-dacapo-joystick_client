@@ -104,6 +104,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="inc\Button.hpp" />
     <ClInclude Include="inc\Joystick.hpp" />
+    <ClInclude Include="inc\Regulator.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
@@ -111,6 +112,7 @@
   <ItemGroup>
     <ClCompile Include="src\Button.cpp" />
     <ClCompile Include="src\Joystick.cpp" />
+    <ClCompile Include="src\Regulator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
