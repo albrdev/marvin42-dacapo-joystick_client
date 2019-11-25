@@ -7,8 +7,6 @@
 #include "custom_packets.h"
 #include "InterruptIn.hpp"
 #include "RotaryEncoder.hpp"
-
-//#define M42_DEBUG // Must define before including 'generic.hpp'
 #include "generic.hpp"
 
 #include "config.h" // IP/port, WiFi SSID/password
