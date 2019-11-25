@@ -18,7 +18,9 @@ void Button::Poll(void)
     {
         m_State = state;
         if(m_OnStateChangedEvent != nullptr)
+        {
             m_OnStateChangedEvent(m_State);
+        }
     }
 }
 
