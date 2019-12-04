@@ -14,16 +14,16 @@
 
 #define D2 2
 #define D3 3
-#define D10 10
 #define D11 11
+#define D12 12
 
 const unsigned long delayTime = 500;
 
 //HC06 bluetooth(D10, D11);
-SoftwareSerial bluetooth(D10, D11);
+SoftwareSerial bluetooth(D11, D12);
 Joystick leftJoystick(A0, A1, D2, 0.1f, 0.025f);
 Joystick rightJoystick(A2, A3, D3, 0.1f, 0.025f);
-Regulator speedRegulator( A4, 31.0f / ANALOG_MAX, 1000.0f / ANALOG_MAX, 0.01f);
+Regulator speedRegulator(A4, 0.05f, 0.95f, 0.05f);
 
 struct
 {
