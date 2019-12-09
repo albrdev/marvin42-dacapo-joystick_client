@@ -12,17 +12,17 @@
 
 #include "config.h" // IP/port, WiFi SSID/password
 
-#define D2 2
-#define D3 3
-#define D11 11
-#define D12 12
+#define JOYSTICK_LEFT_BUTTON 2
+#define JOYSTICK_RIGHT_BUTTON 3
+#define HC06_RX 11
+#define HC06_TX 12
 
 const unsigned long delayTime = 500;
 
-//HC06 bluetooth(D10, D11);
-SoftwareSerial bluetooth(D11, D12);
-Joystick leftJoystick(A0, A1, D2, 0.1f, 0.025f);
-Joystick rightJoystick(A2, A3, D3, 0.1f, 0.025f);
+HC06 bluetooth(HC06_RX, HC06_TX);
+//SoftwareSerial bluetooth(HC06_RX, HC06_TX);
+Joystick leftJoystick(A0, A1, JOYSTICK_LEFT_BUTTON, 0.1f, 0.025f);
+Joystick rightJoystick(A2, A3, JOYSTICK_RIGHT_BUTTON, 0.1f, 0.025f);
 Regulator speedRegulator(A4, 0.05f, 0.95f, 0.05f);
 
 struct
@@ -36,8 +36,8 @@ void SendDirectionPacket(void)
     packet_direction_t pkt;
     packet_mkdirection(&pkt, &inputdata.direction);
 
-    //bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
+    //bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
 }
 
 void SendMotorPowerPacket(void)
@@ -45,8 +45,8 @@ void SendMotorPowerPacket(void)
     packet_motorpower_t pkt;
     packet_mkmotorpower(&pkt, inputdata.power);
 
-    //bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
+    //bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
 }
 
 void SendMotorStopPacket(void)
@@ -54,8 +54,8 @@ void SendMotorStopPacket(void)
     packet_header_t pkt;
     packet_mkbasic(&pkt, CPT_MOTORSTOP);
 
-    //bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
+    //bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
 }
 
 void onLeftJoystickButtonPressed(const bool value)
@@ -63,6 +63,7 @@ void onLeftJoystickButtonPressed(const bool value)
     if(value)
     {
         PrintDebug("Joystick(Left): Released");
+        SendMotorStopPacket();
     }
     /*else
     {
@@ -119,7 +120,7 @@ void onSpeedRegulated(const float oldValue, const float newValue)
     SendMotorPowerPacket();
 }
 
-/*void setupBluetooth(void)
+void setupBluetooth(void)
 {
     Serial.println("Initializing Bluetooth device...");
     bluetooth.Begin(HC06::BR_9600);
@@ -162,14 +163,14 @@ void onSpeedRegulated(const float oldValue, const float newValue)
 
     delay(500UL);
     Serial.println("Setting name");
-    while(!bluetooth.SetName("Marvin42"))
+    while(!bluetooth.SetName("Marvin42-Joystick"))
     {
         Serial.println("Failed");
         delay(500UL);
     }
 
     Serial.println("");
-}*/
+}
 
 void setup(void)
 {
@@ -185,8 +186,8 @@ void setup(void)
     leftJoystick.SetOnStateChangedEvent(onRightJoystickButtonPressed);
     speedRegulator.SetOnValueChangedEvent(onSpeedRegulated);
 
-    //setupBluetooth();
-    bluetooth.begin(9600);
+    setupBluetooth();
+    //bluetooth.begin(9600);
 
     Serial.println("Done");
     Serial.flush();
