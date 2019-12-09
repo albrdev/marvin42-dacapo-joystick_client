@@ -19,8 +19,13 @@
 
 const unsigned long delayTime = 500;
 
+//#define WIRED_COM
+
+#ifndef WIRED_COM
 HC06 bluetooth(HC06_RX, HC06_TX);
-//SoftwareSerial bluetooth(HC06_RX, HC06_TX);
+#else
+#define bluetooth Serial
+#endif
 Joystick leftJoystick(A0, A1, JOYSTICK_LEFT_BUTTON, 0.1f, 0.025f);
 Joystick rightJoystick(A2, A3, JOYSTICK_RIGHT_BUTTON, 0.1f, 0.025f);
 Regulator speedRegulator(A4, 0.05f, 0.95f, 0.05f);
@@ -36,8 +41,11 @@ void SendDirectionPacket(void)
     packet_direction_t pkt;
     packet_mkdirection(&pkt, &inputdata.direction);
 
+    #ifndef WIRED_COM
     bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    //bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    #else
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    #endif
 }
 
 void SendMotorPowerPacket(void)
@@ -45,8 +53,11 @@ void SendMotorPowerPacket(void)
     packet_motorpower_t pkt;
     packet_mkmotorpower(&pkt, inputdata.power);
 
+    #ifndef WIRED_COM
     bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    //bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    #else
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    #endif
 }
 
 void SendMotorStopPacket(void)
@@ -54,8 +65,11 @@ void SendMotorStopPacket(void)
     packet_header_t pkt;
     packet_mkbasic(&pkt, CPT_MOTORSTOP);
 
+    #ifndef WIRED_COM
     bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    //bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    #else
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    #endif
 }
 
 void onLeftJoystickButtonPressed(const bool value)
@@ -122,6 +136,7 @@ void onSpeedRegulated(const float oldValue, const float newValue)
 
 void setupBluetooth(void)
 {
+    #ifndef WIRED_COM
     Serial.println("Initializing Bluetooth device...");
     bluetooth.Begin(HC06::BR_9600);
 
@@ -170,16 +185,19 @@ void setupBluetooth(void)
     }
 
     Serial.println("");
+    #else
+    bluetooth.begin(9600);
+    #endif
 }
 
 void setup(void)
 {
-    Serial.begin(9600, SERIAL_8N1);
-    Serial.println("Initializing...");
-    Serial.flush();
+    //Serial.begin(9600, SERIAL_8N1);
+    //Serial.println("Initializing...");
+    //Serial.flush();
     delay(2500);
 
-    Serial.println("Initializing input device...");
+    //Serial.println("Initializing input device...");
     leftJoystick.SetOnAxisChangedEvent(onLeftJoystickAxisChanged);
     leftJoystick.SetOnStateChangedEvent(onLeftJoystickButtonPressed);
     rightJoystick.SetOnAxisChangedEvent(onRightJoystickAxisChanged);
@@ -187,10 +205,9 @@ void setup(void)
     speedRegulator.SetOnValueChangedEvent(onSpeedRegulated);
 
     setupBluetooth();
-    //bluetooth.begin(9600);
 
-    Serial.println("Done");
-    Serial.flush();
+    //Serial.println("Done");
+    //Serial.flush();
 }
 
 void loop(void)
