@@ -147,7 +147,7 @@ void setupBluetooth(void)
         delay(500UL);
     }
 
-    delay(500UL);
+    //delay(500UL);
     Serial.print("Version: ");
     const char* version = bluetooth.GetVersion();
     if(version != nullptr)
@@ -159,16 +159,15 @@ void setupBluetooth(void)
         Serial.println("N/A");
     }
 
-    delay(500UL);
+    //delay(500UL);
     Serial.println("Setting baud rate");
-
     while(!bluetooth.SetBaudRate(HC06::BR_9600))
     {
         Serial.println("Failed");
         delay(500UL);
     }
 
-    delay(500UL);
+    //delay(500UL);
     Serial.println("Setting PIN");
     while(!bluetooth.SetPIN("1357"))
     {
@@ -176,7 +175,7 @@ void setupBluetooth(void)
         delay(500UL);
     }
 
-    delay(500UL);
+    //delay(500UL);
     Serial.println("Setting name");
     while(!bluetooth.SetName("Marvin42-Joystick"))
     {
