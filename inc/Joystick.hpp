@@ -7,6 +7,11 @@
 class Joystick : public Button
 {
 public:
+    /*! OnAxisChangedEventHandler().
+    \fn OnAxisChangedEventHandler().
+    \param .
+    \return fabs.
+    */
     typedef void(*OnAxisChangedEventHandler)(const float, const float);
 
     Joystick(const uint8_t pinX, const uint8_t pinY, const uint8_t buttonPin, const float deadzone = 0.05f, const float tolerance = 0.0f);
