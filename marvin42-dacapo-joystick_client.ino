@@ -19,7 +19,7 @@
 
 const unsigned long delayTime = 500;
 
-//#define WIRED_COM
+#define WIRED_COM
 
 #ifndef WIRED_COM
 HC06 bluetooth(HC06_RX, HC06_TX);
@@ -185,7 +185,12 @@ void setupBluetooth(void)
 
     Serial.println("");
     #else
-    bluetooth.begin(9600);
+    bluetooth.begin(115200);
+    bluetooth.print("$");
+    bluetooth.print("$");
+    bluetooth.print("$");
+    delay(100);
+    bluetooth.println("U,115200,N");
     #endif
 }
 
