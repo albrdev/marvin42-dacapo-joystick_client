@@ -7,8 +7,8 @@
 class HC06 : private SoftwareSerial
 {
 public:
-    static const size_t NAME_MAXLEN = 20U;
-    static const size_t PIN_LEN = 4U;
+    static const size_t NAME_MAXLEN = 20U; /*!< TODO */
+    static const size_t PIN_LEN = 4U; /*!< TODO */
 
     typedef enum
     {
@@ -29,27 +29,82 @@ public:
 private:
     static const size_t COMMANDBUFFER_SIZE = (((2U + 5U) + NAME_MAXLEN) + 1U); // Largest size a command/response can be (including null character); HC06_NAME_COMMAND + NAME_MAXLEN + 1
 
-    char m_CommandBuffer[HC06::COMMANDBUFFER_SIZE];
-    unsigned long int m_Timeout;
-
+    char m_CommandBuffer[HC06::COMMANDBUFFER_SIZE]; /*!< TODO */
+    unsigned long int m_Timeout; /*!< TODO */
+    
+    /*! GenerateCommand().
+    \fn GenerateCommand().
+    \param .
+    \return .
+    */
     static void GenerateCommand(char* const resultBuffer, const char* const command, const size_t commandLength, const char* const value, const size_t valueLength);
-
+    
+    /*! SendCommand().
+    \fn SendCommand().
+    \param .
+    \return .
+    */
     const char *SendCommand(const char *const command, const int responseLength);
 
 public:
+    /*! Ping().
+    \fn Ping().
+    \param .
+    \return .
+    */
     bool Ping(void);
+
+    /*! GetVersion().
+    \fn GetVersion().
+    \param .
+    \return .
+    */
     const char *GetVersion(void);
+    
+    /*! SetBaudRate().
+    \fn SetBaudRate().
+    \param .
+    \return .
+    */
     bool SetBaudRate(const HC06::baudrate_t value);
+    
+    /*! SetName().
+    \fn SetName().
+    \param .
+    \return .
+    */
     bool SetName(const char *const value);
+    
+    /*! SetPIN().
+    \fn SetPIN().
+    \param .
+    \return .
+    */
     bool SetPIN(const char *const value);
-
+    
+    /*! Begin().
+    \fn Begin().
+    \param .
+    \return .
+    */
     void Begin(const HC06::baudrate_t baudRate);
-
+    
+    /*! AvailableBytes().
+    \fn AvailableBytes().
+    \param .
+    \return .
+    */
     int AvailableBytes(void);
-    size_t Write(const uint8_t *const buffer, const size_t length);
-    size_t Write(const char *const buffer, const size_t length);
-    size_t Write(const char *const str);
-    size_t Write(const uint8_t byte);
+    size_t Write(const uint8_t *const buffer, const size_t length); /*!< TODO */
+    size_t Write(const char *const buffer, const size_t length); /*!< TODO */
+    size_t Write(const char *const str); /*!< TODO */
+    size_t Write(const uint8_t byte); /*!< TODO */
+    
+    /*! Flush().
+    \fn Flush().
+    \param .
+    \return .
+    */
     void Flush(void);
 
     operator bool(void);
