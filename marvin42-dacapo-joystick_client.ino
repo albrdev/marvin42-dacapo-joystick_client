@@ -32,14 +32,23 @@ Regulator speedRegulator(A4, 0.1f, 0.9f, 0.1f);
 
 struct
 {
-    vector2data_t direction;
-    float power;
-} inputdata = { { 0.0f, 0.0f }, 0.0f };
+    struct
+    {
+        vector2data_t direction;
+        float power;
+    } movement;
+
+    struct
+    {
+        int8_t direction;
+        float power;
+    } rotation;
+} inputdata = { { { 0.0f, 0.0f }, 0.0f}, { 0, 0.0f } };
 
 void SendDirectionPacket(void)
 {
     packet_direction_t pkt;
-    packet_mkdirection(&pkt, &inputdata.direction);
+    packet_mkdirection(&pkt, &inputdata.movement.direction);
 
     #ifndef WIRED_COM
     bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
@@ -53,7 +62,21 @@ void SendDirectionPacket(void)
 void SendMotorPowerPacket(void)
 {
     packet_motorpower_t pkt;
-    packet_mkmotorpower(&pkt, inputdata.power);
+    packet_mkmotorpower(&pkt, inputdata.movement.power);
+
+    #ifndef WIRED_COM
+    bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.Flush();
+    #else
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
+    #endif
+}
+
+void SendMotorRotationPacket(void)
+{
+    packet_motorrotation_t pkt;
+    packet_mkmotorrotation(&pkt, inputdata.rotation.direction, inputdata.rotation.power);
 
     #ifndef WIRED_COM
     bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
@@ -110,40 +133,60 @@ void onRightJoystickButtonPressed(const bool value)
 
 void onLeftJoystickAxisChanged(const float x, const float y)
 {
-    inputdata.direction.x = -x;
-    inputdata.direction.y = -y;
+    inputdata.movement.direction.x = -x;
+    inputdata.movement.direction.y = -y;
 
     SendDirectionPacket();
 
     PrintDebug("Joystick(Left): ");
-    PrintDebug("x="); PrintDebug(inputdata.direction.x); PrintDebug(", ");
-    PrintDebug("y="); PrintDebug(inputdata.direction.y);
+    PrintDebug("x="); PrintDebug(inputdata.movement.direction.x); PrintDebug(", ");
+    PrintDebug("y="); PrintDebug(inputdata.movement.direction.y);
     PrintDebugLine("");
 }
 
 void onLeftJoystickAxisChanged2(float x, float y)
 {
-    x = (float)roundf(clamp11(-x));
-    y = (float)roundf(clamp11(-y));
+    x = clamp11((float)roundf(-x));
+    y = clamp11((float)roundf(-y));
 
-    if(x == inputdata.direction.x && y == inputdata.direction.y)
-    {
+    if(x == inputdata.movement.direction.x && y == inputdata.movement.direction.y)
         return;
-    }
 
-    inputdata.direction.x = x;
-    inputdata.direction.y = y;
+    inputdata.movement.direction.x = x;
+    inputdata.movement.direction.y = y;
 
     SendDirectionPacket();
 
     PrintDebug("Joystick(Left): ");
-    PrintDebug("x="); PrintDebug(inputdata.direction.x); PrintDebug(", ");
-    PrintDebug("y="); PrintDebug(inputdata.direction.y);
+    PrintDebug("x="); PrintDebug(inputdata.movement.direction.x); PrintDebug(", ");
+    PrintDebug("y="); PrintDebug(inputdata.movement.direction.y);
     PrintDebugLine("");
 }
 
-void onRightJoystickAxisChanged(const float x, const float y)
+void onRightJoystickAxisChanged(float x, float y)
 {
+    if(x == 0.0f)
+    {
+        if(inputdata.rotation.direction != 0)
+        {
+            inputdata.rotation.direction = 0;
+            SendMotorStopPacket();
+        }
+
+        return;
+    }
+
+    x = clamp11((float)roundf(x));
+    //y = clamp11((float)roundf(y));
+
+    if(x == inputdata.rotation.direction)
+        return;
+
+    inputdata.rotation.direction = x;
+    inputdata.rotation.power = 1.0f;
+
+    SendMotorRotationPacket();
+
     PrintDebug("Joystick(Right): ");
     PrintDebug("x="); PrintDebug(x); PrintDebug(", ");
     PrintDebug("y="); PrintDebug(y);
@@ -152,13 +195,12 @@ void onRightJoystickAxisChanged(const float x, const float y)
 
 void onSpeedRegulated(const float oldValue, const float newValue)
 {
-    inputdata.power = newValue;
-    int dir = sgn(inputdata.power - oldValue);
+    inputdata.movement.power = newValue;
 
     SendMotorPowerPacket();
 
     PrintDebug("Speed: ");
-    PrintDebug(dir > 0 ? "Increased to " : "Decreased to "); PrintDebug(inputdata.power);
+    PrintDebug((newValue - oldValue) > 0.0f ? "Increased to " : "Decreased to "); PrintDebug(inputdata.movement.power);
     PrintDebugLine("");
 }
 
