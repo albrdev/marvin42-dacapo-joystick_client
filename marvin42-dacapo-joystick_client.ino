@@ -1,5 +1,6 @@
 #include <math.h>
 #include <Arduino.h>
+#include <SoftwareSerial.h>
 #include "crc.h"
 #include "packet.h"
 #include "custom_packets.h"
@@ -8,7 +9,6 @@
 #include "Joystick.hpp"
 #include "Regulator.hpp"
 #include "generic.hpp"
-#include <SoftwareSerial.h>
 
 #include "config.h" // IP/port, WiFi SSID/password
 
@@ -28,7 +28,7 @@ HC06 bluetooth(HC06_RX, HC06_TX);
 #endif
 Joystick leftJoystick(A0, A1, JOYSTICK_LEFT_BUTTON, 0.1f, 0.025f);
 Joystick rightJoystick(A2, A3, JOYSTICK_RIGHT_BUTTON, 0.1f, 0.025f);
-Regulator speedRegulator(A4, 0.05f, 0.95f, 0.05f);
+Regulator speedRegulator(A4, 0.1f, 0.9f, 0.1f);
 
 struct
 {
@@ -43,8 +43,10 @@ void SendDirectionPacket(void)
 
     #ifndef WIRED_COM
     bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.Flush();
     #else
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
     #endif
 }
 
@@ -55,8 +57,10 @@ void SendMotorPowerPacket(void)
 
     #ifndef WIRED_COM
     bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.Flush();
     #else
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
     #endif
 }
 
@@ -67,36 +71,39 @@ void SendMotorStopPacket(void)
 
     #ifndef WIRED_COM
     bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.Flush();
     #else
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
     #endif
 }
 
 void onLeftJoystickButtonPressed(const bool value)
 {
+    PrintDebug("Joystick(Left): "); PrintDebug(value ? "Pressed" : "Released");
+    PrintDebugLine("");
+
     if(value)
     {
-        PrintDebug("Joystick(Left): Released");
         SendMotorStopPacket();
     }
-    /*else
+    else
     {
-        PrintDebug("Joystick(Left): Pressed");
-    }*/
+        SendMotorStopPacket();
+    }
 
     delay(250);
 }
 
 void onRightJoystickButtonPressed(const bool value)
 {
+    PrintDebug("Joystick(Right): "); PrintDebug(value ? "Pressed" : "Released");
+    PrintDebugLine("");
+
     if(value)
     {
-        PrintDebug("Joystick(Right): Released");
+        //TODO: Add some functionality
     }
-    /*else
-    {
-        PrintDebug("Joystick(Right): Pressed");
-    }*/
 
     delay(250);
 }
@@ -106,12 +113,33 @@ void onLeftJoystickAxisChanged(const float x, const float y)
     inputdata.direction.x = -x;
     inputdata.direction.y = -y;
 
+    SendDirectionPacket();
+
     PrintDebug("Joystick(Left): ");
     PrintDebug("x="); PrintDebug(inputdata.direction.x); PrintDebug(", ");
     PrintDebug("y="); PrintDebug(inputdata.direction.y);
     PrintDebugLine("");
+}
+
+void onLeftJoystickAxisChanged2(float x, float y)
+{
+    x = (float)roundf(clamp11(-x));
+    y = (float)roundf(clamp11(-y));
+
+    if(x == inputdata.direction.x && y == inputdata.direction.y)
+    {
+        return;
+    }
+
+    inputdata.direction.x = x;
+    inputdata.direction.y = y;
 
     SendDirectionPacket();
+
+    PrintDebug("Joystick(Left): ");
+    PrintDebug("x="); PrintDebug(inputdata.direction.x); PrintDebug(", ");
+    PrintDebug("y="); PrintDebug(inputdata.direction.y);
+    PrintDebugLine("");
 }
 
 void onRightJoystickAxisChanged(const float x, const float y)
@@ -127,11 +155,11 @@ void onSpeedRegulated(const float oldValue, const float newValue)
     inputdata.power = newValue;
     int dir = sgn(inputdata.power - oldValue);
 
+    SendMotorPowerPacket();
+
     PrintDebug("Speed: ");
     PrintDebug(dir > 0 ? "Increased to " : "Decreased to "); PrintDebug(inputdata.power);
     PrintDebugLine("");
-
-    SendMotorPowerPacket();
 }
 
 void setupBluetooth(void)
@@ -186,11 +214,11 @@ void setupBluetooth(void)
     Serial.println("");
     #else
     bluetooth.begin(115200);
-    bluetooth.print("$");
+    /*bluetooth.print("$");
     bluetooth.print("$");
     bluetooth.print("$");
     delay(100);
-    bluetooth.println("U,115200,N");
+    bluetooth.println("U,115200,N");*/
     #endif
 }
 
@@ -202,7 +230,7 @@ void setup(void)
     delay(2500);
 
     //Serial.println("Initializing input device...");
-    leftJoystick.SetOnAxisChangedEvent(onLeftJoystickAxisChanged);
+    leftJoystick.SetOnAxisChangedEvent(onLeftJoystickAxisChanged2);
     leftJoystick.SetOnStateChangedEvent(onLeftJoystickButtonPressed);
     rightJoystick.SetOnAxisChangedEvent(onRightJoystickAxisChanged);
     leftJoystick.SetOnStateChangedEvent(onRightJoystickButtonPressed);
