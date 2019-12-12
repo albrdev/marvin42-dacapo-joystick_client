@@ -10,8 +10,6 @@
 #include "Regulator.hpp"
 #include "generic.hpp"
 
-#include "config.h" // IP/port, WiFi SSID/password
-
 #define JOYSTICK_LEFT_BUTTON 2
 #define JOYSTICK_RIGHT_BUTTON 3
 #define HC06_RX 11
