@@ -12,17 +12,18 @@
 
 #define JOYSTICK_LEFT_BUTTON 2
 #define JOYSTICK_RIGHT_BUTTON 3
-#define HC06_RX 11
-#define HC06_TX 12
+#define SERIAL_RX 11
+#define SERIAL_TX 12
 
 const unsigned long delayTime = 500;
 
 #define WIRED_COM
 
 #ifndef WIRED_COM
-HC06 bluetooth(HC06_RX, HC06_TX);
+HC06 bluetooth(SERIAL_RX, SERIAL_TX);
 #else
-#define bluetooth Serial
+//#define bluetooth Serial
+SoftwareSerial bluetooth(SERIAL_RX, SERIAL_TX);
 #endif
 Joystick leftJoystick(A0, A1, JOYSTICK_LEFT_BUTTON, 0.1f, 0.025f);
 Joystick rightJoystick(A2, A3, JOYSTICK_RIGHT_BUTTON, 0.1f, 0.025f);
@@ -101,14 +102,10 @@ void SendMotorStopPacket(void)
 
 void onLeftJoystickButtonPressed(const bool value)
 {
-    PrintDebug("Joystick(Left): "); PrintDebug(value ? "Pressed" : "Released");
+    PrintDebug("Joystick(Left): "); PrintDebug(!value ? "Pressed" : "Released");
     PrintDebugLine("");
 
-    if(value)
-    {
-        SendMotorStopPacket();
-    }
-    else
+    if(!value)
     {
         SendMotorStopPacket();
     }
@@ -150,12 +147,12 @@ void onLeftJoystickAxisChanged2(float x, float y)
 
 void onRightJoystickButtonPressed(const bool value)
 {
-    PrintDebug("Joystick(Right): "); PrintDebug(value ? "Pressed" : "Released");
+    PrintDebug("Joystick(Right): "); PrintDebug(!value ? "Pressed" : "Released");
     PrintDebugLine("");
 
-    if(value)
+    if(!value)
     {
-        //TODO: Add some functionality
+        SendMotorStopPacket();
     }
 
     delay(250);
@@ -264,12 +261,12 @@ void setupBluetooth(void)
 
 void setup(void)
 {
-    //Serial.begin(9600, SERIAL_8N1);
-    //Serial.println("Initializing...");
-    //Serial.flush();
+    Serial.begin(9600, SERIAL_8N1);
+    Serial.println("Initializing...");
+    Serial.flush();
     delay(2500);
 
-    //Serial.println("Initializing input device...");
+    Serial.println("Initializing input device...");
     leftJoystick.SetOnAxisChangedEvent(onLeftJoystickAxisChanged2);
     leftJoystick.SetOnStateChangedEvent(onLeftJoystickButtonPressed);
     rightJoystick.SetOnAxisChangedEvent(onRightJoystickAxisChanged);
@@ -278,8 +275,8 @@ void setup(void)
 
     setupBluetooth();
 
-    //Serial.println("Done");
-    //Serial.flush();
+    Serial.println("Done");
+    Serial.flush();
 }
 
 void loop(void)
