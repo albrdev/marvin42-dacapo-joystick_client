@@ -14,6 +14,7 @@ void Button::SetOnStateChangedEvent(const OnStateChangedEventHandler value)
 void Button::Poll(void)
 {
     bool state = digitalRead(m_Pin);
+    // Trigger callback when current value differs from previous
     if(state != m_State)
     {
         m_State = state;
