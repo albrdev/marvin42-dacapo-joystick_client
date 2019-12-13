@@ -103,6 +103,7 @@
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="inc\Button.hpp" />
+    <ClInclude Include="inc\HC06.hpp" />
     <ClInclude Include="inc\Joystick.hpp" />
     <ClInclude Include="inc\Regulator.hpp" />
   </ItemGroup>
@@ -111,6 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Button.cpp" />
+    <ClCompile Include="src\HC06.cpp" />
     <ClCompile Include="src\Joystick.cpp" />
     <ClCompile Include="src\Regulator.cpp" />
   </ItemGroup>
