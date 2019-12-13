@@ -116,19 +116,6 @@ void onLeftJoystickButtonPressed(const bool value)
     delay(250);
 }
 
-void onRightJoystickButtonPressed(const bool value)
-{
-    PrintDebug("Joystick(Right): "); PrintDebug(value ? "Pressed" : "Released");
-    PrintDebugLine("");
-
-    if(value)
-    {
-        //TODO: Add some functionality
-    }
-
-    delay(250);
-}
-
 void onLeftJoystickAxisChanged(const float x, const float y)
 {
     inputdata.movement.direction.x = -x;
@@ -161,6 +148,19 @@ void onLeftJoystickAxisChanged2(float x, float y)
     PrintDebugLine("");
 }
 
+void onRightJoystickButtonPressed(const bool value)
+{
+    PrintDebug("Joystick(Right): "); PrintDebug(value ? "Pressed" : "Released");
+    PrintDebugLine("");
+
+    if(value)
+    {
+        //TODO: Add some functionality
+    }
+
+    delay(250);
+}
+
 void onRightJoystickAxisChanged(float x, float y)
 {
     if(x == 0.0f)
@@ -174,8 +174,8 @@ void onRightJoystickAxisChanged(float x, float y)
         return;
     }
 
-    x = clamp11((float)roundf(x));
-    //y = clamp11((float)roundf(y));
+    x = clamp11((float)roundf(-x));
+    //y = clamp11((float)roundf(-y));
 
     if(x == inputdata.rotation.direction)
         return;
