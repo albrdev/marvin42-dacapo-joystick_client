@@ -24,6 +24,7 @@ AT+BAUDC    OK1382400       Sets the baud rate to 1382400
 
 #define STRLEN(x) ((sizeof(x) / sizeof(*(x))) - 1U)
 
+// HC06 commands
 #define HC06_AT                     "AT"
 #define HC06_OK                     "OK"
 #define HC06_PING_COMMAND           HC06_AT
@@ -61,9 +62,9 @@ AT+BAUDC    OK1382400       Sets the baud rate to 1382400
 
 void HC06::GenerateCommand(char*const resultBuffer, const char* const command, const size_t commandLength, const char* const value, const size_t valueLength)
 {
-    strcpy(resultBuffer, command);
-    strcpy(resultBuffer + commandLength, value);
-    resultBuffer[commandLength + valueLength] = '\0';
+    strcpy(resultBuffer, command);                      // Copy first part of the command
+    strcpy(resultBuffer + commandLength, value);        // Copy the rest (command parameters or such)
+    resultBuffer[commandLength + valueLength] = '\0';   // Ensure string termination
 }
 
 const char *HC06::SendCommand(const char *const command, const int responseLength)
@@ -71,25 +72,27 @@ const char *HC06::SendCommand(const char *const command, const int responseLengt
     unsigned long int timeout;
     int availableBytes;
 
-    SoftwareSerial::print(command);
-    SoftwareSerial::flush();
+    SoftwareSerial::print(command); // Send command to device
+    SoftwareSerial::flush();        // Flush immediately
 
-    timeout = millis() + m_Timeout;
-    while((availableBytes = SoftwareSerial::available()) < responseLength)
+    timeout = millis() + m_Timeout; // Timeout point in time
+    while((availableBytes = SoftwareSerial::available()) < responseLength) // Wait until we have a full response message
     {
+        // Timeout has been reached, return failure
         if((long)(millis() - timeout) >= 0)
         {
             return nullptr;
         }
     }
 
+    // Response is somehow longer than the buffer can handle, this should never happen
     if((size_t)availableBytes > HC06::COMMANDBUFFER_SIZE)
     {
         return nullptr;
     }
 
-    size_t readLen = SoftwareSerial::readBytes(m_CommandBuffer, availableBytes);
-    if(readLen <= 0U || readLen > HC06::COMMANDBUFFER_SIZE)
+    size_t readLen = SoftwareSerial::readBytes(m_CommandBuffer, availableBytes); // Receive the actual response
+    if(readLen <= 0U) // Extra check to see if we got the length (probably unnecessary)
     {
         return nullptr;
     }
@@ -107,7 +110,7 @@ bool HC06::Ping(void)
 const char *HC06::GetVersion(void)
 {
     const char *result = SendCommand(HC06_VERSION_COMMAND, 12);
-    return result != nullptr ? (result + STRLEN(HC06_OK)) : nullptr;
+    return result != nullptr ? (result + STRLEN(HC06_OK)) : nullptr; // Return a pointer starting from the actual version part of the string
 }
 
 bool HC06::SetBaudRate(const HC06::baudrate_t value)
@@ -115,6 +118,7 @@ bool HC06::SetBaudRate(const HC06::baudrate_t value)
     const char *cmd;
     const char *rsp;
 
+    // Find and assign the baud rate command according to enum value
     switch(value)
     {
         case HC06::baudrate_t::BR_1200:
@@ -181,19 +185,20 @@ bool HC06::SetBaudRate(const HC06::baudrate_t value)
             return false;
     }
 
-    const char *result = SendCommand(cmd, strlen(rsp));
+    const char *result = SendCommand(cmd, strlen(rsp)); // Send the found command and its length
     return result != nullptr && strcmp(result, rsp) == 0;
 }
 
 bool HC06::SetName(const char *const value)
 {
     size_t len = strlen(value);
+    // Return false if string is longer than the max. allowed length
     if(len > HC06::NAME_MAXLEN)
     {
         return false;
     }
 
-    HC06::GenerateCommand(m_CommandBuffer, HC06_NAME_COMMAND, STRLEN(HC06_NAME_COMMAND), value, len);
+    HC06::GenerateCommand(m_CommandBuffer, HC06_NAME_COMMAND, STRLEN(HC06_NAME_COMMAND), value, len); // Build a command string from variying input
     const char *result = SendCommand(m_CommandBuffer, STRLEN(HC06_NAME_RESPONSE));
     return result != nullptr && strcmp(result, HC06_NAME_RESPONSE) == 0;
 }
@@ -201,16 +206,18 @@ bool HC06::SetName(const char *const value)
 bool HC06::SetPIN(const char *const value)
 {
     size_t len = strlen(value);
+    // Return false if string is longer than the max. allowed length
     if(len != HC06::PIN_LEN)
     {
         return false;
     }
 
-    HC06::GenerateCommand(m_CommandBuffer, HC06_PIN_COMMAND, STRLEN(HC06_PIN_COMMAND), value, len);
+    HC06::GenerateCommand(m_CommandBuffer, HC06_PIN_COMMAND, STRLEN(HC06_PIN_COMMAND), value, len); // Build a command string from variying input
     const char *result = SendCommand(m_CommandBuffer, STRLEN(HC06_PIN_RESPONSE));
     return result != nullptr && strcmp(result, HC06_PIN_RESPONSE) == 0;
 }
 
+// Base methods we don't want to hide
 void HC06::Begin(const HC06::baudrate_t baudRate) { SoftwareSerial::begin((long int)baudRate); }
 int HC06::AvailableBytes(void) { return SoftwareSerial::available(); }
 size_t HC06::Write(const uint8_t *const buffer, const size_t length) { return SoftwareSerial::write(buffer, length); }
