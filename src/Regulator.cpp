@@ -5,9 +5,9 @@
 
 float Regulator::GetValue(void) const
 {
-    float value = normalize01((float)analogRead(m_Pin), 0, ANALOG_MAX);
-    value = clamp(value, m_LowerCap, m_UpperCap);
-    return normalize01(value, m_LowerCap, m_UpperCap);
+    float value = normalize01((float)analogRead(m_Pin), 0, ANALOG_MAX); // Nomralize the absolute min/max values we could read
+    value = clamp(value, m_LowerCap, m_UpperCap);                       // Clamp them to the custom min/max caps
+    return normalize01(value, m_LowerCap, m_UpperCap);                  // Normalize again to get a 0-1 range with our custom value caps
 }
 
 void Regulator::SetOnValueChangedEvent(const OnValueChangedEventHandler value)
@@ -18,6 +18,7 @@ void Regulator::SetOnValueChangedEvent(const OnValueChangedEventHandler value)
 void Regulator::Poll(void)
 {
     float value = GetValue();
+    // Only tolerate change when read value differs too much from the previous one
     if(absdiff(value, m_Value) >= m_Tolerance)
     {
         if(m_OnValueChangedEvent != nullptr)
