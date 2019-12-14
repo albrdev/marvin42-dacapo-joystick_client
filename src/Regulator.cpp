@@ -6,7 +6,8 @@
 float Regulator::GetValue(void) const
 {
     float value = normalize01((float)analogRead(m_Pin), 0, ANALOG_MAX);
-    return value < m_LowerCap ? 0.0f : (value > m_UpperCap ? 1.0f : value);
+    value = clamp(value, m_LowerCap, m_UpperCap);
+    return normalize01(value, m_LowerCap, m_UpperCap);
 }
 
 void Regulator::SetOnValueChangedEvent(const OnValueChangedEventHandler value)
