@@ -18,7 +18,7 @@ private:
 
     float m_LowerCap; /*!< TODO */
     float m_UpperCap; /*!< TODO */
-    float m_Sensitivity; /*!< TODO */
+    float m_Tolerance; /*!< TODO */
 
     float m_Value = 0.0f; /*!< TODO */
 
@@ -46,7 +46,7 @@ public:
     */
     virtual void Poll(void);
 
-    Regulator(const uint8_t pin, const float lowerCap = 0.0f, const float upperCap = 1.0f, const float sensitivity = 0.0f);
+    Regulator(const uint8_t pin, const float lowerCap = 0.0f, const float upperCap = 1.0f, const float tolerance = 0.0f);
 };
 
 #endif // __REGULATOR_HPP__

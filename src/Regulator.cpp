@@ -18,7 +18,7 @@ void Regulator::SetOnValueChangedEvent(const OnValueChangedEventHandler value)
 void Regulator::Poll(void)
 {
     float value = GetValue();
-    if(absdiff(value, m_Value) >= m_Sensitivity)
+    if(absdiff(value, m_Value) >= m_Tolerance)
     {
         if(m_OnValueChangedEvent != nullptr)
         {
@@ -29,7 +29,7 @@ void Regulator::Poll(void)
     }
 }
 
-Regulator::Regulator(const uint8_t pin, const float lowerCap, const float upperCap, const float sensitivity) : m_Pin(pin), m_LowerCap(lowerCap), m_UpperCap(upperCap), m_Sensitivity(sensitivity)
+Regulator::Regulator(const uint8_t pin, const float lowerCap, const float upperCap, const float tolerance) : m_Pin(pin), m_LowerCap(lowerCap), m_UpperCap(upperCap), m_Tolerance(tolerance)
 {
     pinMode(pin, INPUT);
 }

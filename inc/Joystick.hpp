@@ -19,7 +19,7 @@ private:
     uint8_t m_PinY; /*!< map PinX to designated hardware pin */
 
     float m_Deadzone; /*!< setting up the deadzone where joystick should not react */
-    float m_Sensitivity; /*!< setting up the sensitivity */
+    float m_Tolerance; /*!< setting up the tolerance */
 
     OnAxisChangedEventHandler m_OnAxisChangedEvent = nullptr;
 
@@ -55,7 +55,7 @@ public:
     */
     virtual void Poll(void) override;
 
-    Joystick(const uint8_t pinX, const uint8_t pinY, const uint8_t buttonPin, const float deadzone = 0.05f, const float sensitivity = 0.0f);
+    Joystick(const uint8_t pinX, const uint8_t pinY, const uint8_t buttonPin, const float deadzone = 0.05f, const float tolerance = 0.0f);
 };
 
 #endif // __JOYSTICK_HPP__
