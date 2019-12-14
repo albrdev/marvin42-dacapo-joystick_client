@@ -24,7 +24,7 @@ void Joystick::Poll(void)
 {
     float x = GetX();
     float y = GetY();
-    if(absdiff(x, m_X) >= m_Tolerance || absdiff(y, m_Y) >= m_Tolerance) // Only tolerate change when read value has a differs enough from the previous
+    if(absdiff(x, m_X) >= m_Sensitivity || absdiff(y, m_Y) >= m_Sensitivity) // Only tolerate change when read value has a differs enough from the previous
     {
         if(m_OnAxisChangedEvent != nullptr)
         {
@@ -38,7 +38,7 @@ void Joystick::Poll(void)
     Button::Poll(); // Poll the joystick button
 }
 
-Joystick::Joystick(const uint8_t pinX, const uint8_t pinY, const uint8_t buttonPin, const float deadzone, const float tolerance) : Button(buttonPin), m_PinX(pinX), m_PinY(pinY), m_Deadzone(deadzone), m_Tolerance(tolerance)
+Joystick::Joystick(const uint8_t pinX, const uint8_t pinY, const uint8_t buttonPin, const float deadzone, const float sensitivity) : Button(buttonPin), m_PinX(pinX), m_PinY(pinY), m_Deadzone(deadzone), m_Sensitivity(sensitivity)
 {
     pinMode(m_PinX, INPUT);
     pinMode(m_PinY, INPUT);
