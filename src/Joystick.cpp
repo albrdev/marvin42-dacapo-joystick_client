@@ -24,7 +24,8 @@ void Joystick::Poll(void)
 {
     float x = GetX();
     float y = GetY();
-    if(absdiff(x, m_X) >= m_Tolerance || absdiff(y, m_Y) >= m_Tolerance) // Only tolerate change when read value has a differs enough from the previous
+    // Only tolerate change when read values differ too much from the previous ones
+    if(absdiff(x, m_X) >= m_Tolerance || absdiff(y, m_Y) >= m_Tolerance)
     {
         if(m_OnAxisChangedEvent != nullptr)
         {
