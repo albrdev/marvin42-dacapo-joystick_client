@@ -55,7 +55,7 @@ public:
     /*! Ping().
     \fn Ping().
     \param  N/A.
-    \return True is the device is responsive, false if not.
+    \return True is the device is responsive, false otherwise.
     */
     bool Ping(void);
 
@@ -138,6 +138,11 @@ public:
     */
     void Flush(void);
 
+    /*! operator bool().
+    \fn operator bool().
+    \param  N/A.
+    \return True if the serial is available, false otherwise.
+    */
     operator bool(void);
 
     /*! HC06().
