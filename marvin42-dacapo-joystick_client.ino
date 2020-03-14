@@ -261,10 +261,9 @@ void setupBluetooth(void)
 
 void setup(void)
 {
+    delay(2500);
     Serial.begin(9600, SERIAL_8N1);
     Serial.println("Initializing...");
-    Serial.flush();
-    delay(2500);
 
     Serial.println("Initializing input device...");
     leftJoystick.SetOnAxisChangedEvent(onLeftJoystickAxisChanged2);
@@ -276,6 +275,7 @@ void setup(void)
     setupBluetooth();
 
     Serial.println("Done");
+    Serial.println();
     Serial.flush();
 }
 
