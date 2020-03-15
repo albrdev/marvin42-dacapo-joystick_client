@@ -4,7 +4,7 @@
 #include "crc.h"
 #include "packet.h"
 #include "custom_packets.h"
-#include "HC06.hpp"
+#include "StreamCommandHandler.hpp"
 #include "Button.hpp"
 #include "Joystick.hpp"
 #include "Regulator.hpp"
@@ -20,7 +20,9 @@ const unsigned long delayTime = 500;
 //#define WIRED_COM
 
 #ifndef WIRED_COM
-HC06 bluetooth(SERIAL_RX, SERIAL_TX);
+SoftwareSerial bluetooth(SERIAL_RX, SERIAL_TX);
+char commandBuffer[27U + 1U];
+StreamCommandHandler commandHandler(bluetooth, commandBuffer);
 #else
 //#define bluetooth Serial
 SoftwareSerial bluetooth(SERIAL_RX, SERIAL_TX);
@@ -50,8 +52,8 @@ void SendDirectionPacket(void)
     packet_mkdirection(&pkt, &inputdata.movement.direction);
 
     #ifndef WIRED_COM
-    bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.Flush();
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
     #else
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
     bluetooth.flush();
@@ -64,8 +66,8 @@ void SendMotorPowerPacket(void)
     packet_mkmotorpower(&pkt, inputdata.movement.power);
 
     #ifndef WIRED_COM
-    bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.Flush();
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
     #else
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
     bluetooth.flush();
@@ -78,8 +80,8 @@ void SendMotorRotationPacket(void)
     packet_mkmotorrotation(&pkt, inputdata.rotation.direction, inputdata.rotation.power);
 
     #ifndef WIRED_COM
-    bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.Flush();
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
     #else
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
     bluetooth.flush();
@@ -92,8 +94,8 @@ void SendMotorStopPacket(void)
     packet_mkbasic(&pkt, CPT_MOTORSTOP);
 
     #ifndef WIRED_COM
-    bluetooth.Write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.Flush();
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
     #else
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
     bluetooth.flush();
@@ -203,53 +205,48 @@ void setupBluetooth(void)
 {
     #ifndef WIRED_COM
     Serial.println("Initializing Bluetooth device...");
-    bluetooth.Begin(HC06::BR_9600);
+    bluetooth.begin(9600);
 
-    Serial.println("Verifying device");
-    while(!bluetooth.Ping())
+    Serial.println("Verifying...");
+    while(!commandHandler.PrintCommand("AT", "OK"))
     {
         Serial.println("Failed");
         delay(500UL);
     }
-
     delay(500UL);
+
+    #define BT_VER "linvorV1.8"
     Serial.print("Version: ");
-    const char* version = bluetooth.GetVersion();
-    if(version != nullptr)
-    {
-        Serial.println(version);
-    }
-    else
-    {
-        Serial.println("N/A");
-    }
-
+    commandHandler.Print("AT+VERSION");
+    const char* version = commandHandler.GetResponse(12U);
+    Serial.println(version != nullptr ? version + 2U : "N/A");
     delay(500UL);
-    Serial.println("Setting PIN");
-    while(!bluetooth.SetPIN("1357"))
+
+    Serial.println("Setting name...");
+    while(!commandHandler.PrintCommand("AT+NAMEMarvin42-Joystick", "OKsetname"))
     {
         Serial.println("Failed");
         delay(500UL);
     }
-
     delay(500UL);
-    Serial.println("Setting name");
-    while(!bluetooth.SetName("Marvin42-Joystick"))
+
+    Serial.println("Setting PIN...");
+    while(!commandHandler.PrintCommand("AT+PIN1357", "OKsetPIN"))
     {
         Serial.println("Failed");
         delay(500UL);
     }
-
     delay(500UL);
-    Serial.println("Setting baud rate");
-    while(!bluetooth.SetBaudRate(HC06::BR_9600))
+
+    Serial.println("Setting baud rate...");
+    while(!commandHandler.PrintCommand("AT+BAUD4", "OK9600"))
     {
         Serial.println("Failed");
         delay(500UL);
     }
-
     delay(500UL);
-    bluetooth.Begin(HC06::BR_9600);
+
+    bluetooth.begin(9600);
 
     Serial.println();
     #else

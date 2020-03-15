@@ -103,18 +103,18 @@
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="inc\Button.hpp" />
-    <ClInclude Include="inc\HC06.hpp" />
     <ClInclude Include="inc\Joystick.hpp" />
     <ClInclude Include="inc\Regulator.hpp" />
+    <ClInclude Include="inc\StreamCommandHandler.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Button.cpp" />
-    <ClCompile Include="src\HC06.cpp" />
     <ClCompile Include="src\Joystick.cpp" />
     <ClCompile Include="src\Regulator.cpp" />
+    <ClCompile Include="src\StreamCommandHandler.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

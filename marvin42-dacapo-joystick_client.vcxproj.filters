@@ -37,7 +37,7 @@
     <ClInclude Include="inc\Regulator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\HC06.hpp">
+    <ClInclude Include="inc\StreamCommandHandler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -54,7 +54,7 @@
     <ClCompile Include="src\Regulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\HC06.cpp">
+    <ClCompile Include="src\StreamCommandHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
