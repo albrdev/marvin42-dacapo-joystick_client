@@ -17,7 +17,7 @@
 
 const unsigned long delayTime = 500;
 
-#define WIRED_COM
+//#define WIRED_COM
 
 #ifndef WIRED_COM
 HC06 bluetooth(SERIAL_RX, SERIAL_TX);
@@ -212,7 +212,7 @@ void setupBluetooth(void)
         delay(500UL);
     }
 
-    //delay(500UL);
+    delay(500UL);
     Serial.print("Version: ");
     const char* version = bluetooth.GetVersion();
     if(version != nullptr)
@@ -224,15 +224,7 @@ void setupBluetooth(void)
         Serial.println("N/A");
     }
 
-    //delay(500UL);
-    Serial.println("Setting baud rate");
-    while(!bluetooth.SetBaudRate(HC06::BR_9600))
-    {
-        Serial.println("Failed");
-        delay(500UL);
-    }
-
-    //delay(500UL);
+    delay(500UL);
     Serial.println("Setting PIN");
     while(!bluetooth.SetPIN("1357"))
     {
@@ -240,7 +232,7 @@ void setupBluetooth(void)
         delay(500UL);
     }
 
-    //delay(500UL);
+    delay(500UL);
     Serial.println("Setting name");
     while(!bluetooth.SetName("Marvin42-Joystick"))
     {
@@ -248,14 +240,34 @@ void setupBluetooth(void)
         delay(500UL);
     }
 
-    Serial.println("");
+    delay(500UL);
+    Serial.println("Setting baud rate");
+    while(!bluetooth.SetBaudRate(HC06::BR_9600))
+    {
+        Serial.println("Failed");
+        delay(500UL);
+    }
+
+    delay(500UL);
+    bluetooth.Begin(HC06::BR_9600);
+
+    Serial.println();
     #else
     bluetooth.begin(115200);
-    /*bluetooth.print("$");
+    bluetooth.print("$");
     bluetooth.print("$");
     bluetooth.print("$");
     delay(100);
-    bluetooth.println("U,115200,N");*/
+    /*bluetooth.println("SU,115200,N");
+    delay(100);
+    bluetooth.println("SR,B827EB3315BD");
+    delay(100);
+    bluetooth.println("SM,3");
+    delay(100);
+    bluetooth.println("SP,1357");
+    delay(100);*/
+    bluetooth.println("---");
+    bluetooth.flush();
     #endif
 }
 
