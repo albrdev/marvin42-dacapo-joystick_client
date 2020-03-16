@@ -27,8 +27,6 @@ char* StreamCommandHandler::GetResponse(const size_t length, const unsigned long
     size_t readLength = m_Source.readBytes(m_Buffer, availableSize); // Receive the actual response
     if(readLength != availableSize) // Extra check to see if we got the length (probably unnecessary)
     {
-        Serial.print("RSP: ");
-        Serial.println(m_Buffer);
         return nullptr;
     }
 
