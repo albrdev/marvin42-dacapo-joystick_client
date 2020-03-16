@@ -16,7 +16,7 @@ size_t StreamCommandHandler::AwaitResponse(const size_t length, const unsigned l
 
 char* StreamCommandHandler::GetResponse(const size_t length, const unsigned long int timeout)
 {
-    size_t availableSize = AwaitResponse(length);
+    size_t availableSize = AwaitResponse(length, timeout);
 
     // Response is somehow longer than the buffer can handle, this should never happen
     if(availableSize > length)
@@ -42,9 +42,9 @@ bool StreamCommandHandler::PrintCommand(const char* const command, const char* c
     m_Source.flush();        // Flush immediately
 
     size_t responseLength = strlen(response);
-    char* responseResult = GetResponse(responseLength);
+    char* responseResult = GetResponse(responseLength, timeout);
 
-    return responseResult != nullptr && strcmp(responseResult, m_Buffer) == 0;
+    return responseResult != nullptr && strcmp(response, responseResult) == 0;
 }
 
 size_t StreamCommandHandler::Print(const char* const str)
