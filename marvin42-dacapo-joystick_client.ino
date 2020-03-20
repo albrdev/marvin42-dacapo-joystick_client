@@ -105,7 +105,7 @@ void SendMotorStopPacket(void)
 void onLeftJoystickButtonPressed(const bool value)
 {
     PrintDebug("Joystick(Left): "); PrintDebug(!value ? "Pressed" : "Released");
-    PrintDebugLine("");
+    PrintDebugLine();
 
     if(!value)
     {
@@ -125,7 +125,7 @@ void onLeftJoystickAxisChanged(const float x, const float y)
     PrintDebug("Joystick(Left): ");
     PrintDebug("x="); PrintDebug(inputdata.movement.direction.x); PrintDebug(", ");
     PrintDebug("y="); PrintDebug(inputdata.movement.direction.y);
-    PrintDebugLine("");
+    PrintDebugLine();
 }
 
 void onLeftJoystickAxisChanged2(float x, float y)
@@ -144,13 +144,13 @@ void onLeftJoystickAxisChanged2(float x, float y)
     PrintDebug("Joystick(Left): ");
     PrintDebug("x="); PrintDebug(inputdata.movement.direction.x); PrintDebug(", ");
     PrintDebug("y="); PrintDebug(inputdata.movement.direction.y);
-    PrintDebugLine("");
+    PrintDebugLine();
 }
 
 void onRightJoystickButtonPressed(const bool value)
 {
     PrintDebug("Joystick(Right): "); PrintDebug(!value ? "Pressed" : "Released");
-    PrintDebugLine("");
+    PrintDebugLine();
 
     if(!value)
     {
@@ -187,7 +187,7 @@ void onRightJoystickAxisChanged(float x, float y)
     PrintDebug("Joystick(Right): ");
     PrintDebug("x="); PrintDebug(x); PrintDebug(", ");
     PrintDebug("y="); PrintDebug(y);
-    PrintDebugLine("");
+    PrintDebugLine();
 }
 
 void onSpeedRegulated(const float oldValue, const float newValue)
@@ -198,14 +198,16 @@ void onSpeedRegulated(const float oldValue, const float newValue)
 
     PrintDebug("Speed: ");
     PrintDebug((newValue - oldValue) > 0.0f ? "Increased to " : "Decreased to "); PrintDebug(inputdata.movement.power);
-    PrintDebugLine("");
+    PrintDebugLine();
 }
 
 void setupBluetooth(void)
 {
     #ifndef WIRED_COM
     Serial.println("Initializing Bluetooth device...");
-    bluetooth.begin(9600);
+    bluetooth.begin(115200);
+
+    return;
 
     Serial.println("Verifying...");
     while(!commandHandler.PrintCommand("AT", "OK"))
