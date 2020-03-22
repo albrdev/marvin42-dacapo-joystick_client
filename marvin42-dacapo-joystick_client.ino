@@ -46,6 +46,9 @@ struct
     } rotation;
 } inputdata = { { { 0.0f, 0.0f }, 0.0f}, { 0, 0.0f } };
 
+#define KA_INTERVAL (1UL * 1000UL)
+unsigned long int nextKeepAlive = 0UL;
+
 void SendDirectionPacket(void)
 {
     packet_direction_t pkt;
@@ -58,6 +61,8 @@ void SendDirectionPacket(void)
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
     bluetooth.flush();
     #endif
+
+    nextKeepAlive = millis() + KA_INTERVAL;
 }
 
 void SendMotorPowerPacket(void)
@@ -72,6 +77,8 @@ void SendMotorPowerPacket(void)
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
     bluetooth.flush();
     #endif
+
+    nextKeepAlive = millis() + KA_INTERVAL;
 }
 
 void SendMotorRotationPacket(void)
@@ -86,6 +93,8 @@ void SendMotorRotationPacket(void)
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
     bluetooth.flush();
     #endif
+
+    nextKeepAlive = millis() + KA_INTERVAL;
 }
 
 void SendMotorStopPacket(void)
@@ -100,6 +109,24 @@ void SendMotorStopPacket(void)
     bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
     bluetooth.flush();
     #endif
+
+    nextKeepAlive = millis() + KA_INTERVAL;
+}
+
+void SendKeepAlivePacket(void)
+{
+    packet_header_t pkt;
+    packet_mkbasic(&pkt, PT_SYN);
+
+    #ifndef WIRED_COM
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
+    #else
+    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
+    bluetooth.flush();
+    #endif
+
+    nextKeepAlive = millis() + KA_INTERVAL;
 }
 
 void onLeftJoystickButtonPressed(const bool value)
@@ -295,6 +322,11 @@ void loop(void)
     leftJoystick.Poll();
     rightJoystick.Poll();
     speedRegulator.Poll();
+
+    if((long)(millis() - nextKeepAlive) >= 0L)
+    {
+        SendKeepAlivePacket();
+    }
 
     //delay(delayTime);
 }
