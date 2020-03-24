@@ -46,7 +46,7 @@ struct
     } rotation;
 } inputdata = { { { 0.0f, 0.0f }, 0.0f}, { 0, 0.0f } };
 
-#define KA_INTERVAL (1UL * 1000UL)
+#define KA_INTERVAL 1000UL
 unsigned long int nextKeepAlive = 0UL;
 
 void SendDirectionPacket(void)
