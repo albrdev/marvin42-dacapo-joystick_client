@@ -19,16 +19,14 @@
 
 const unsigned long delayTime = 500;
 
-//#define WIRED_COM
+SoftwareSerial transmitter(SERIAL_RX, SERIAL_TX);
 
-#ifndef WIRED_COM
-SoftwareSerial bluetooth(SERIAL_RX, SERIAL_TX);
+#define COM_BLUETOOTH
+#ifdef COM_BLUETOOTH
 char commandBuffer[27U + 1U];
-StreamCommandHandler commandHandler(bluetooth, commandBuffer);
-#else
-//#define bluetooth Serial
-SoftwareSerial bluetooth(SERIAL_RX, SERIAL_TX);
+StreamCommandHandler commandHandler(transmitter, commandBuffer);
 #endif
+
 Joystick leftJoystick(A0, A1, JOYSTICK_LEFT_BUTTON, 0.1f, 0.025f);
 Joystick rightJoystick(A2, A3, JOYSTICK_RIGHT_BUTTON, 0.1f, 0.025f);
 Regulator speedRegulator(A4, 0.1f, 0.9f, 0.1f);
@@ -51,20 +49,20 @@ struct
 #define KA_INTERVAL 1000UL
 unsigned long int nextKeepAlive = 0UL;
 
+void Send(const void* const data, const size_t size)
+{
+    transmitter.write((const uint8_t*)data, size);
+    transmitter.flush();
+
+    nextKeepAlive = millis() + KA_INTERVAL;
+}
+
 void SendDirectionPacket(void)
 {
     packet_direction_t pkt;
     packet_mkdirection(&pkt, &inputdata.movement.direction);
 
-    #ifndef WIRED_COM
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #else
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #endif
-
-    nextKeepAlive = millis() + KA_INTERVAL;
+    Send(&pkt, sizeof(pkt));
 }
 
 void SendMotorPowerPacket(void)
@@ -72,15 +70,7 @@ void SendMotorPowerPacket(void)
     packet_motorpower_t pkt;
     packet_mkmotorpower(&pkt, inputdata.movement.power);
 
-    #ifndef WIRED_COM
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #else
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #endif
-
-    nextKeepAlive = millis() + KA_INTERVAL;
+    Send(&pkt, sizeof(pkt));
 }
 
 void SendMotorRotationPacket(void)
@@ -88,15 +78,7 @@ void SendMotorRotationPacket(void)
     packet_motorrotation_t pkt;
     packet_mkmotorrotation(&pkt, inputdata.rotation.direction, inputdata.rotation.power);
 
-    #ifndef WIRED_COM
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #else
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #endif
-
-    nextKeepAlive = millis() + KA_INTERVAL;
+    Send(&pkt, sizeof(pkt));
 }
 
 void SendMotorStopPacket(void)
@@ -104,15 +86,7 @@ void SendMotorStopPacket(void)
     packet_header_t pkt;
     packet_mkbasic(&pkt, CPT_MOTORSTOP);
 
-    #ifndef WIRED_COM
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #else
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #endif
-
-    nextKeepAlive = millis() + KA_INTERVAL;
+    Send(&pkt, sizeof(pkt));
 }
 
 void SendKeepAlivePacket(void)
@@ -120,15 +94,7 @@ void SendKeepAlivePacket(void)
     packet_header_t pkt;
     packet_mkbasic(&pkt, PT_SYN);
 
-    #ifndef WIRED_COM
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #else
-    bluetooth.write((const uint8_t*)&pkt, sizeof(pkt));
-    bluetooth.flush();
-    #endif
-
-    nextKeepAlive = millis() + KA_INTERVAL;
+    Send(&pkt, sizeof(pkt));
 }
 
 void onLeftJoystickButtonPressed(const bool value)
@@ -230,73 +196,10 @@ void onSpeedRegulated(const float oldValue, const float newValue)
     PrintDebugLine();
 }
 
-void setupBluetooth(void)
+void setupCommunication(void)
 {
-    #ifndef WIRED_COM
-    Serial.println("Initializing Bluetooth device...");
-    bluetooth.begin(115200);
-
-    return;
-
-    Serial.println("Verifying...");
-    while(!commandHandler.PrintCommand("AT", "OK"))
-    {
-        Serial.println("Failed");
-        delay(500UL);
-    }
-    delay(500UL);
-
-    #define BT_VER "linvorV1.8"
-    Serial.print("Version: ");
-    commandHandler.Print("AT+VERSION");
-    const char* version = commandHandler.GetResponse(12U);
-    Serial.println(version != nullptr ? version + 2U : "N/A");
-    delay(500UL);
-
-    Serial.println("Setting name...");
-    while(!commandHandler.PrintCommand("AT+NAMEMarvin42-Joystick", "OKsetname"))
-    {
-        Serial.println("Failed");
-        delay(500UL);
-    }
-    delay(500UL);
-
-    Serial.println("Setting PIN...");
-    while(!commandHandler.PrintCommand("AT+PIN1357", "OKsetPIN"))
-    {
-        Serial.println("Failed");
-        delay(500UL);
-    }
-    delay(500UL);
-
-    Serial.println("Setting baud rate...");
-    while(!commandHandler.PrintCommand("AT+BAUD4", "OK9600"))
-    {
-        Serial.println("Failed");
-        delay(500UL);
-    }
-    delay(500UL);
-
-    bluetooth.begin(9600);
-
-    Serial.println();
-    #else
-    bluetooth.begin(115200);
-    bluetooth.print("$");
-    bluetooth.print("$");
-    bluetooth.print("$");
-    delay(100);
-    /*bluetooth.println("SU,115200,N");
-    delay(100);
-    bluetooth.println("SR,B827EB3315BD");
-    delay(100);
-    bluetooth.println("SM,3");
-    delay(100);
-    bluetooth.println("SP,1357");
-    delay(100);*/
-    bluetooth.println("---");
-    bluetooth.flush();
-    #endif
+    Serial.println("Initializing communication...");
+    transmitter.begin(115200);
 }
 
 void setup(void)
@@ -312,7 +215,7 @@ void setup(void)
     leftJoystick.SetOnStateChangedEvent(onRightJoystickButtonPressed);
     speedRegulator.SetOnValueChangedEvent(onSpeedRegulated);
 
-    setupBluetooth();
+    setupCommunication();
 
     Serial.println("Done");
     Serial.println();
