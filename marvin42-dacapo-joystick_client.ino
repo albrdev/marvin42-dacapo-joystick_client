@@ -1,6 +1,8 @@
 #include <math.h>
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+#include "I2Cdev.h"
+#include "MPU6050_6Axis_MotionApps20.h"
 #include "crc.h"
 #include "packet.h"
 #include "custom_packets.h"
