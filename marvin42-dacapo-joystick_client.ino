@@ -11,6 +11,7 @@
 #include "Joystick.hpp"
 #include "Regulator.hpp"
 #include "generic.hpp"
+#include "debug.hpp"
 
 #define JOYSTICK_LEFT_BUTTON 2
 #define JOYSTICK_RIGHT_BUTTON 3
@@ -43,8 +44,10 @@ struct
     {
         int8_t direction;
         float power;
-    } rotation;
-} inputdata = { { { 0.0f, 0.0f }, 0.0f}, { 0, 0.0f } };
+    } spin;
+
+    Quaternion rotation;
+} inputdata = { { { 0.0f, 0.0f }, 0.0f}, { 0, 0.0f }, Quaternion() };
 
 #define KA_INTERVAL 1000UL
 unsigned long int nextKeepAlive = 0UL;
@@ -73,10 +76,10 @@ void SendMotorPowerPacket(void)
     Send(&pkt, sizeof(pkt));
 }
 
-void SendMotorRotationPacket(void)
+void SendMotorSpinPacket(void)
 {
-    packet_motorrotation_t pkt;
-    packet_mkmotorrotation(&pkt, inputdata.rotation.direction, inputdata.rotation.power);
+    packet_motorspin_t pkt;
+    packet_mkmotorspin(&pkt, inputdata.spin.direction, inputdata.spin.power);
 
     Send(&pkt, sizeof(pkt));
 }
@@ -99,8 +102,8 @@ void SendKeepAlivePacket(void)
 
 void onLeftJoystickButtonPressed(const bool value)
 {
-    PrintDebug("Joystick(Left): "); PrintDebug(!value ? "Pressed" : "Released");
-    PrintDebugLine();
+    DebugPrintN(DM_JSLEFT, "Joystick(Left): "); DebugPrintN(DM_JSLEFT, !value ? "Pressed" : "Released");
+    DebugPrintLineN(DM_JSLEFT);
 
     if(!value)
     {
@@ -117,10 +120,10 @@ void onLeftJoystickAxisChanged(const float x, const float y)
 
     SendDirectionPacket();
 
-    PrintDebug("Joystick(Left): ");
-    PrintDebug("x="); PrintDebug(inputdata.movement.direction.x); PrintDebug(", ");
-    PrintDebug("y="); PrintDebug(inputdata.movement.direction.y);
-    PrintDebugLine();
+    DebugPrintN(DM_JSLEFT, "Joystick(Left): ");
+    DebugPrintN(DM_JSLEFT, "x="); DebugPrintN(DM_JSLEFT, inputdata.movement.direction.x); DebugPrintN(DM_JSLEFT, ", ");
+    DebugPrintN(DM_JSLEFT, "y="); DebugPrintN(DM_JSLEFT, inputdata.movement.direction.y);
+    DebugPrintLineN(DM_JSLEFT);
 }
 
 void onLeftJoystickAxisChanged2(float x, float y)
@@ -136,16 +139,16 @@ void onLeftJoystickAxisChanged2(float x, float y)
 
     SendDirectionPacket();
 
-    PrintDebug("Joystick(Left): ");
-    PrintDebug("x="); PrintDebug(inputdata.movement.direction.x); PrintDebug(", ");
-    PrintDebug("y="); PrintDebug(inputdata.movement.direction.y);
-    PrintDebugLine();
+    DebugPrintN(DM_JSLEFT, "Joystick(Left): ");
+    DebugPrintN(DM_JSLEFT, "x="); DebugPrintN(DM_JSLEFT, inputdata.movement.direction.x); DebugPrintN(DM_JSLEFT, ", ");
+    DebugPrintN(DM_JSLEFT, "y="); DebugPrintN(DM_JSLEFT, inputdata.movement.direction.y);
+    DebugPrintLineN(DM_JSLEFT);
 }
 
 void onRightJoystickButtonPressed(const bool value)
 {
-    PrintDebug("Joystick(Right): "); PrintDebug(!value ? "Pressed" : "Released");
-    PrintDebugLine();
+    DebugPrintN(DM_JSRIGHT, "Joystick(Right): "); DebugPrintN(DM_JSRIGHT, !value ? "Pressed" : "Released");
+    DebugPrintLineN(DM_JSRIGHT);
 
     if(!value)
     {
@@ -159,9 +162,9 @@ void onRightJoystickAxisChanged(float x, float y)
 {
     if(x == 0.0f)
     {
-        if(inputdata.rotation.direction != 0)
+        if(inputdata.spin.direction != 0)
         {
-            inputdata.rotation.direction = 0;
+            inputdata.spin.direction = 0;
             SendMotorStopPacket();
         }
 
@@ -171,18 +174,18 @@ void onRightJoystickAxisChanged(float x, float y)
     x = clamp11((float)roundf(-x));
     //y = clamp11((float)roundf(-y));
 
-    if(x == inputdata.rotation.direction)
+    if(x == inputdata.spin.direction)
         return;
 
-    inputdata.rotation.direction = x;
-    inputdata.rotation.power = 1.0f;
+    inputdata.spin.direction = x;
+    inputdata.spin.power = 1.0f;
 
-    SendMotorRotationPacket();
+    SendMotorSpinPacket();
 
-    PrintDebug("Joystick(Right): ");
-    PrintDebug("x="); PrintDebug(x); PrintDebug(", ");
-    PrintDebug("y="); PrintDebug(y);
-    PrintDebugLine();
+    DebugPrintN(DM_JSRIGHT, "Joystick(Right): ");
+    DebugPrintN(DM_JSRIGHT, "x="); DebugPrintN(DM_JSRIGHT, x); DebugPrintN(DM_JSRIGHT, ", ");
+    DebugPrintN(DM_JSRIGHT, "y="); DebugPrintN(DM_JSRIGHT, y);
+    DebugPrintLineN(DM_JSRIGHT);
 }
 
 void onSpeedRegulated(const float oldValue, const float newValue)
@@ -191,14 +194,14 @@ void onSpeedRegulated(const float oldValue, const float newValue)
 
     SendMotorPowerPacket();
 
-    PrintDebug("Speed: ");
-    PrintDebug((newValue - oldValue) > 0.0f ? "Increased to " : "Decreased to "); PrintDebug(inputdata.movement.power);
-    PrintDebugLine();
+    DebugPrintN(DM_SPEED, "Speed: ");
+    DebugPrintN(DM_SPEED, (newValue - oldValue) > 0.0f ? "Increased to " : "Decreased to "); DebugPrintN(DM_SPEED, inputdata.movement.power);
+    DebugPrintLineN(DM_SPEED);
 }
 
 void setupCommunication(void)
 {
-    Serial.println("Initializing communication...");
+    DebugPrintLineN(DM_SETUP, "Initializing communication...");
     transmitter.begin(115200);
 }
 
@@ -206,9 +209,9 @@ void setup(void)
 {
     delay(2500);
     Serial.begin(9600, SERIAL_8N1);
-    Serial.println("Initializing...");
+    DebugPrintLineN(DM_SETUP, "Initializing...");
 
-    Serial.println("Initializing input device...");
+    DebugPrintLineN(DM_SETUP, "Initializing input device...");
     leftJoystick.SetOnAxisChangedEvent(onLeftJoystickAxisChanged2);
     leftJoystick.SetOnStateChangedEvent(onLeftJoystickButtonPressed);
     rightJoystick.SetOnAxisChangedEvent(onRightJoystickAxisChanged);
@@ -217,9 +220,9 @@ void setup(void)
 
     setupCommunication();
 
-    Serial.println("Done");
-    Serial.println();
-    Serial.flush();
+    DebugPrintLineN(DM_SETUP, "Done");
+    DebugPrintLineN(DM_SETUP);
+    DebugFlushN(DM_SETUP);
 }
 
 void loop(void)
