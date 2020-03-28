@@ -13,10 +13,13 @@
 #include "generic.hpp"
 #include "debug.hpp"
 
-#define JOYSTICK_LEFT_BUTTON 2
-#define JOYSTICK_RIGHT_BUTTON 3
-#define SERIAL_RX 11
-#define SERIAL_TX 12
+#define JOYSTICK_LEFT_BUTTON    2
+#define JOYSTICK_RIGHT_BUTTON   3
+
+#define SERIAL_RX               11
+#define SERIAL_TX               12
+
+#define NAVIGATION_MODE         5
 
 const unsigned long delayTime = 500;
 
@@ -64,6 +67,15 @@ void SendDirectionPacket(void)
 {
     packet_direction_t pkt;
     packet_mkdirection(&pkt, &inputdata.movement.direction);
+
+    Send(&pkt, sizeof(pkt));
+}
+
+void SendDirQuatPacket(void)
+{
+    packet_dirquat_t pkt;
+    quaterniondata_t q = { inputdata.rotation.w, inputdata.rotation.x, inputdata.rotation.y, inputdata.rotation.z };
+    packet_mkdirquat(&pkt, &inputdata.movement.direction, &q);
 
     Send(&pkt, sizeof(pkt));
 }
@@ -118,7 +130,14 @@ void onLeftJoystickAxisChanged(const float x, const float y)
     inputdata.movement.direction.x = -x;
     inputdata.movement.direction.y = -y;
 
-    SendDirectionPacket();
+    if(digitalRead(NAVIGATION_MODE) == HIGH)
+    {
+        SendDirQuatPacket();
+    }
+    else
+    {
+        SendDirectionPacket();
+    }
 
     DebugPrintN(DM_JSLEFT, "Joystick(Left): ");
     DebugPrintN(DM_JSLEFT, "x="); DebugPrintN(DM_JSLEFT, inputdata.movement.direction.x); DebugPrintN(DM_JSLEFT, ", ");
@@ -137,7 +156,14 @@ void onLeftJoystickAxisChanged2(float x, float y)
     inputdata.movement.direction.x = x;
     inputdata.movement.direction.y = y;
 
-    SendDirectionPacket();
+    if(digitalRead(NAVIGATION_MODE) == HIGH)
+    {
+        SendDirQuatPacket();
+    }
+    else
+    {
+        SendDirectionPacket();
+    }
 
     DebugPrintN(DM_JSLEFT, "Joystick(Left): ");
     DebugPrintN(DM_JSLEFT, "x="); DebugPrintN(DM_JSLEFT, inputdata.movement.direction.x); DebugPrintN(DM_JSLEFT, ", ");
@@ -210,6 +236,8 @@ void setup(void)
     delay(2500);
     Serial.begin(9600, SERIAL_8N1);
     DebugPrintLineN(DM_SETUP, "Initializing...");
+
+    pinMode(NAVIGATION_MODE, INPUT);
 
     DebugPrintLineN(DM_SETUP, "Initializing input device...");
     leftJoystick.SetOnAxisChangedEvent(onLeftJoystickAxisChanged2);
