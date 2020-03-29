@@ -3,7 +3,7 @@ To build this project with PlatformIO you need to use "git clone --recurse-submo
 ## BlueSMiRF setup (master)
 | Command          | Description                                               |
 | ---------------- | ----------------------------------------------------      |
-| SR,001122334455  | Set slave MAC address                                     |
+| SR,001122334455  | Set the remote slave MAC address                          |
 | SN,<em>name</em> | Set name (optional)                                       |
 | SP,<em>pin</em>  | Set PIN code (must match with slave)                      |
 | SU,115200,N      | Set baud rate and disable parity (must match with slave)  |
