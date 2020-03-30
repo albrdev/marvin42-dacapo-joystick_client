@@ -14,17 +14,26 @@
 #include "generic.hpp"
 #include "debug.hpp"
 
-#define JOYSTICK_LEFT_BUTTON    6
-#define JOYSTICK_RIGHT_BUTTON   7
+#define PIN_JS1_VRX         A0
+#define PIN_JS1_VRY         A1
+#define PIN_JS1_SW          6
 
-#define SERIAL_RX               11
-#define SERIAL_TX               12
+#define PIN_JS2_VRX         A2
+#define PIN_JS2_VRY         A3
+#define PIN_JS2_SW          7
 
-#define NAVIGATION_MODE         8
+#define PIN_SERIAL_RX       11
+#define PIN_SERIAL_TX       12
 
-#define LOOP_DELAY              10UL
+#define PIN_SPEEDREGULATOR  A6
 
-SoftwareSerial transmitter(SERIAL_RX, SERIAL_TX);
+#define PIN_NAVMODE         8
+
+#define KEEPALIVE_INTERVAL  (1000UL - 50UL)
+
+#define LOOP_DELAY          10UL
+
+SoftwareSerial transmitter(PIN_SERIAL_RX, PIN_SERIAL_TX);
 
 #define COM_BLUETOOTH
 #ifdef COM_BLUETOOTH
@@ -32,9 +41,9 @@ char commandBuffer[27U + 1U];
 StreamCommandHandler commandHandler(transmitter, commandBuffer);
 #endif
 
-Joystick leftJoystick(A0, A1, JOYSTICK_LEFT_BUTTON, 0.1f, 0.025f);
-Joystick rightJoystick(A2, A3, JOYSTICK_RIGHT_BUTTON, 0.1f, 0.025f);
-Regulator speedRegulator(A6, 0.1f, 0.9f, 0.1f);
+Joystick leftJoystick(PIN_JS1_VRX, PIN_JS1_VRY, PIN_JS1_SW, 0.1f, 0.025f);
+Joystick rightJoystick(PIN_JS2_VRX, PIN_JS2_VRY, PIN_JS2_SW, 0.1f, 0.025f);
+Regulator speedRegulator(PIN_SPEEDREGULATOR, 0.1f, 0.9f, 0.1f);
 
 struct
 {
@@ -53,7 +62,6 @@ struct
     Quaternion rotation;
 } inputdata = { { { 0.0f, 0.0f }, 0.0f}, { 0, 0.0f }, Quaternion() };
 
-#define KA_INTERVAL 1000UL
 unsigned long int nextKeepAlive = 0UL;
 
 void Send(const void* const data, const size_t size)
@@ -61,7 +69,7 @@ void Send(const void* const data, const size_t size)
     transmitter.write((const uint8_t*)data, size);
     transmitter.flush();
 
-    nextKeepAlive = millis() + KA_INTERVAL;
+    nextKeepAlive = millis() + KEEPALIVE_INTERVAL;
 }
 
 void SendDirectionPacket(void)
@@ -131,7 +139,7 @@ void onLeftJoystickAxisChanged(const float x, const float y)
     inputdata.movement.direction.x = -x;
     inputdata.movement.direction.y = -y;
 
-    if(digitalRead(NAVIGATION_MODE) == HIGH)
+    if(digitalRead(PIN_NAVMODE) == HIGH)
     {
         SendDirQuatPacket();
     }
@@ -157,7 +165,7 @@ void onLeftJoystickAxisChanged2(float x, float y)
     inputdata.movement.direction.x = x;
     inputdata.movement.direction.y = y;
 
-    if(digitalRead(NAVIGATION_MODE) == HIGH)
+    if(digitalRead(PIN_NAVMODE) == HIGH)
     {
         SendDirQuatPacket();
     }
@@ -308,7 +316,7 @@ void setup(void)
     Serial.begin(9600, SERIAL_8N1);
     DebugPrintLineN(DM_SETUP, "Initializing...");
 
-    pinMode(NAVIGATION_MODE, INPUT);
+    pinMode(PIN_NAVMODE, INPUT);
 
     DebugPrintLineN(DM_SETUP, "Initializing input device...");
     leftJoystick.SetOnAxisChangedEvent(onLeftJoystickAxisChanged2);
@@ -329,7 +337,7 @@ void setup(void)
 void loop(void)
 {
     leftJoystick.Poll();
-    rightJoystick.Poll();
+    //rightJoystick.Poll();
     speedRegulator.Poll();
 
     if((long)(millis() - nextKeepAlive) >= 0L)
