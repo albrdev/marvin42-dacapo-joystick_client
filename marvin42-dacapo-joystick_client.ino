@@ -34,7 +34,7 @@ StreamCommandHandler commandHandler(transmitter, commandBuffer);
 
 Joystick leftJoystick(A0, A1, JOYSTICK_LEFT_BUTTON, 0.1f, 0.025f);
 Joystick rightJoystick(A2, A3, JOYSTICK_RIGHT_BUTTON, 0.1f, 0.025f);
-Regulator speedRegulator(A4, 0.1f, 0.9f, 0.1f);
+Regulator speedRegulator(A6, 0.1f, 0.9f, 0.1f);
 
 struct
 {
