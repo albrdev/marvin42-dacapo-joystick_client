@@ -1,6 +1,7 @@
 #include <math.h>
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+#include <Wire.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 #include "crc.h"
@@ -225,6 +226,76 @@ void onSpeedRegulated(const float oldValue, const float newValue)
     DebugPrintLineN(DM_SPEED);
 }
 
+void setupFail(void)
+{
+    while(true);
+}
+
+#define MPU6060_INT_PIN 2
+MPU6050 mpu;
+uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
+uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
+uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
+uint16_t fifoCount;     // count of all bytes currently in FIFO
+uint8_t fifoBuffer[64]; // FIFO storage buffer
+
+volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
+void dmpDataReady()
+{
+    mpuInterrupt = true;
+}
+
+void setupMPU6050(void)
+{
+    Wire.begin();
+    Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
+
+    // initialize device
+    DebugPrintLineN(DM_SETUP, "MPU6050...");
+    mpu.initialize();
+    pinMode(MPU6060_INT_PIN, INPUT);
+
+    if(!mpu.testConnection())
+    {
+        DebugPrintLineN(DM_SETUP, "Failed");
+        setupFail();
+    }
+
+    // supply your own gyro offsets here, scaled for min sensitivity
+    mpu.setXGyroOffset(220);
+    mpu.setYGyroOffset(76);
+    mpu.setZGyroOffset(-85);
+    mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
+
+    // Calibration Time: generate offsets and calibrate our MPU6050
+    mpu.CalibrateAccel(6);
+    mpu.CalibrateGyro(6);
+    //mpu.PrintActiveOffsets();
+
+    // load and configure the DMP
+    devStatus = mpu.dmpInitialize();
+    if(devStatus != 0)
+    {
+        DebugPrintN(DM_SETUP, "Fail: DMP, "); DebugPrintLineN(DM_SETUP, devStatus);
+        setupFail();
+    }
+
+    // turn on the DMP, now that it's ready
+    mpu.setDMPEnabled(true);
+
+    // enable Arduino interrupt detection
+    attachInterrupt(digitalPinToInterrupt(MPU6060_INT_PIN), dmpDataReady, RISING);
+    mpuIntStatus = mpu.getIntStatus();
+
+    // get expected DMP packet size for later comparison
+    packetSize = mpu.dmpGetFIFOPacketSize();
+}
+
+bool readDMP(void)
+{
+    return (mpu.getIntStatus() & 0b00001) != 0 && mpu.dmpGetCurrentFIFOPacket(fifoBuffer) != 0 && mpu.dmpGetQuaternion(&inputdata.rotation, fifoBuffer) == 0;
+}
+
 void setupCommunication(void)
 {
     DebugPrintLineN(DM_SETUP, "Initializing communication...");
@@ -248,6 +319,8 @@ void setup(void)
 
     setupCommunication();
 
+    setupMPU6050();
+
     DebugPrintLineN(DM_SETUP, "Done");
     DebugPrintLineN(DM_SETUP);
     DebugFlushN(DM_SETUP);
@@ -263,6 +336,8 @@ void loop(void)
     {
         SendKeepAlivePacket();
     }
+
+    readDMP();
 
     delay(LOOP_DELAY);
 }
