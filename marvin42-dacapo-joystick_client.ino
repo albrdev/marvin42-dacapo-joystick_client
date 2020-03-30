@@ -13,13 +13,13 @@
 #include "generic.hpp"
 #include "debug.hpp"
 
-#define JOYSTICK_LEFT_BUTTON    2
-#define JOYSTICK_RIGHT_BUTTON   3
+#define JOYSTICK_LEFT_BUTTON    6
+#define JOYSTICK_RIGHT_BUTTON   7
 
 #define SERIAL_RX               11
 #define SERIAL_TX               12
 
-#define NAVIGATION_MODE         5
+#define NAVIGATION_MODE         8
 
 #define LOOP_DELAY              10UL
 
