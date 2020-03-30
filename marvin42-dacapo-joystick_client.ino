@@ -21,7 +21,7 @@
 
 #define NAVIGATION_MODE         5
 
-const unsigned long delayTime = 500;
+#define LOOP_DELAY              10UL
 
 SoftwareSerial transmitter(SERIAL_RX, SERIAL_TX);
 
@@ -264,5 +264,5 @@ void loop(void)
         SendKeepAlivePacket();
     }
 
-    //delay(delayTime);
+    delay(LOOP_DELAY);
 }
