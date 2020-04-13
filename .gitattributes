@@ -103,3 +103,8 @@ GNUmakefile     text eol=lf
 
 *.ino           text diff=cpp
 *.h.example     text diff=c
+
+*.png           binary
+*.svg           text
+
+*.fzz           binary
